@@ -63,8 +63,9 @@ changed sessions. **Safari and the Home Screen app have separate storage on iOS*
 Built end to end on the beast. 14 unit tests, lint clean, driven in headless
 Chromium at iPhone 13 size (start → rebuy → cash out, stats both formats, chart
 tooltip, backup, edit) with no console errors and no horizontal overflow.
-**Not yet verified on a real iPhone** — share sheet, Add to Home Screen, iOS
-date/time pickers, safe areas.
+At build time it had not been tried on a real iPhone. **Later the same day the owner
+confirmed it installed via Add to Home Screen and works on her iPhone** (share
+sheet backup and the iOS pickers not specifically reported on).
 
 ### 2026-09-24 — polish + published
 Polish pass (felt glow, chip logo, hero cards, gold buttons, calendar-tile rows,
@@ -81,6 +82,23 @@ Hand, 4 promos, 2 series (MSPT Oct 1-12, WSOP-C Nov), 122 tournaments. 21 unit
 tests, lint clean, headless iPhone check incl. offline reload (jackpots still
 shown). Home games stay as ordinary sessions (a few a year; owner: no
 backfilling, forward only).
+
+### 2026-09-24 — redirect repo, v0.2.0 shipped (wrap)
+- **"It doesn't exist" on her phone** = GitHub's "There isn't a GitHub Pages site
+  here" 404: Pages paths are case-sensitive (`/pokerstats/` 404s) and the bare
+  `gigi404.github.io` had no site. Fixed with a separate public repo
+  **`Gigi404/gigi404.github.io`** (beast: `~/dev/Apps/gigi404.github.io`) whose
+  `index.html` and `404.html` are the same redirect to `/PokerStats/`, keeping any
+  deep-link remainder. Verified in headless Chromium: bare domain, `/pokerstats`
+  and `/pokerstats/` all land in the app. Side effect: the bare domain now belongs
+  to PokerStats; a second Pages app would need that redirect revisited.
+- v0.2.0 pushed (owner's OK); the Pages run ran the fetcher on GitHub with every
+  section `ok`, and the live `data/playground.json` served 122 tournaments.
+- **Not yet observed:** the first scheduled (06:00) run — only push-triggered
+  runs so far — and her phone actually showing v0.2.0.
+- Tried and replaced: remote edits through `ssh '…'` with nested heredocs broke on
+  quoting twice (no damage); writing the script/commit message locally and
+  `scp`-ing it works, as the Apps-level notes already say.
 
 ## Rejected approaches
 - Beast backend (Flask + SQLite): her iPhone would need Tailscale, plus the
