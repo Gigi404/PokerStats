@@ -47,6 +47,15 @@ tooltip, backup, edit) with no console errors and no horizontal overflow.
 **Not yet verified on a real iPhone** — share sheet, Add to Home Screen, iOS
 date/time pickers, safe areas.
 
+### 2026-09-24 — polish + published
+Polish pass (felt glow, chip logo, hero cards, gold buttons, calendar-tile rows,
+tab-bar pill, slide-up sheet, shaded chart). Repo **Gigi404/PokerStats** created
+(public), Pages enabled with build_type=workflow; live at
+https://gigi404.github.io/PokerStats/ — verified 200s for page/manifest/sw/icon,
+no console errors, service worker controls the page on reload. The first push
+run was cancelled by the concurrency group (Pages was enabled a moment after the
+push); the manual workflow_dispatch run deployed. Every push to main redeploys.
+
 ## Rejected approaches
 - Beast backend (Flask + SQLite): her iPhone would need Tailscale, plus the
   Doze-style tunnel drops seen on the Pixel. Revisit only as optional sync.
