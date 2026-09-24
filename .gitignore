@@ -1,5 +1,7 @@
 node_modules
 dist
 dev-dist
+# Written by scripts/fetch-playground.mjs at deploy time; never committed.
+public/data/
 *.log
 .DS_Store

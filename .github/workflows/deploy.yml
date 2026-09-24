@@ -1,4 +1,9 @@
-# Build and publish to GitHub Pages on every push to main.
+# Build and publish to GitHub Pages on every push to main, and every morning.
+#
+# The morning run exists for the Playground tab: it re-fetches Playground's
+# schedule, promos and jackpots (scripts/fetch-playground.mjs) and redeploys,
+# so the data is at most a day old. Nothing is committed — the data file only
+# lives in the deployed site.
 #
 # The app is static (no backend), so this is the whole deployment: GitHub builds
 # dist/ and serves it at https://gigi404.github.io/PokerStats/. The repo's
@@ -8,12 +13,17 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    # 10:00 UTC = 06:00 Montréal in summer, 05:00 in winter.
+    - cron: '0 10 * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  # Only for the keep-alive step below.
+  actions: write
 
 # One deploy at a time; a newer push replaces a queued one.
 concurrency:
@@ -31,6 +41,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # Never fails the deploy: a section Playground doesn't answer keeps its
+      # copy from the live site, and the tab shows how old that copy is.
+      - run: npm run fetch:playground
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -45,3 +58,15 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # GitHub switches off scheduled workflows in a repo with no commits for 60
+  # days. For an app that is finished and just being used, that would silently
+  # stop the morning refresh. Re-enabling the workflow on every run resets the
+  # clock without committing anything.
+  keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/deploy.yml/enable"
+        env:
+          GH_TOKEN: ${{ github.token }}

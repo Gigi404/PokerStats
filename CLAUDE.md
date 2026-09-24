@@ -29,6 +29,25 @@ Currency: **CAD only** (owner's decision).
 Cash and tournaments never mix: $/hr, win rate for cash; ROI, ITM, best finish
 for tournaments. $/hr only counts sessions with both times.
 
+## Playground tab (v0.2.0)
+Read-only "what's on" for Playground Poker Club: the 3 Bad Beat Jackpots, big
+series, the tournament schedule (daily / series / satellites) and poker promos.
+- `scripts/fetch-playground.mjs` (Node, no deps) writes `public/data/playground.json`
+  (gitignored, never committed). Sources, all undocumented and public:
+  `services.playground.ca/api/v1/poker/tournaments?start_date&end_date` (end
+  EXCLUSIVE, ~7 weeks horizon; type 1 daily, 2 satellite, 5 series, 4 online
+  skipped), `/api/v1/jackpots/{primary_bbj,omaha_bbj,high_stakes_bbj}` (both wrapped
+  in `{data: ...}`), `cms.playground.ca/api/promotions` (poker category, filtered to
+  live by publishAt/unpublishAt) and `/api/high-hand-promotions` (Markdown prose).
+- Their CORS only allows www.playground.ca, hence the server-side fetch.
+- Each section fails independently and keeps its copy from the live site,
+  recorded in `stale`; the tab shows the data's age.
+- Runs in the deploy workflow on every push **and daily at 10:00 UTC** (owner:
+  once a morning). A `keepalive` job re-enables the workflow so GitHub's
+  60-days-without-commits rule can't silently stop the refresh.
+- Service worker: NetworkFirst for the data file only (not precached).
+- Owner decisions: info only (no "log this tournament"), English, Playground only.
+
 ## Backup
 Data is phone-only, so the Backup tab exports a JSON backup (restorable) and a
 CSV (spreadsheet, NOT restorable) through the iOS share sheet. Nudge after 10
@@ -55,6 +74,13 @@ https://gigi404.github.io/PokerStats/ — verified 200s for page/manifest/sw/ico
 no console errors, service worker controls the page on reload. The first push
 run was cancelled by the concurrency group (Pages was enabled a moment after the
 push); the manual workflow_dispatch run deployed. Every push to main redeploys.
+
+### 2026-09-24 — Playground tab (v0.2.0)
+Data sources mapped by a research pass. Fetcher run live: 3 jackpots, High
+Hand, 4 promos, 2 series (MSPT Oct 1-12, WSOP-C Nov), 122 tournaments. 21 unit
+tests, lint clean, headless iPhone check incl. offline reload (jackpots still
+shown). Home games stay as ordinary sessions (a few a year; owner: no
+backfilling, forward only).
 
 ## Rejected approaches
 - Beast backend (Flask + SQLite): her iPhone would need Tailscale, plus the

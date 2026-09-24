@@ -53,6 +53,23 @@ export default defineConfig({
         // Precache the build and nothing else: the app never makes a network
         // request of its own, so there is nothing for runtimeCaching to do.
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+
+        // The one runtime rule: Playground's daily data file. NetworkFirst so an
+        // app opened with signal gets this morning's copy, and one opened at a
+        // table with none falls back to the last copy (the tab shows its age).
+        // Deliberately NOT precached — a precached copy only changes on deploy.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.endsWith('/data/playground.json'),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'playground-data',
+              networkTimeoutSeconds: 4,
+              cacheableResponse: { statuses: [200] },
+              expiration: { maxEntries: 1 },
+            },
+          },
+        ],
       },
     }),
   ],
