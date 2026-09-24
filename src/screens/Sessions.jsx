@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import ActiveSession from '../components/ActiveSession.jsx'
 import InstallBanner from '../components/InstallBanner.jsx'
+import Logo from '../components/Logo.jsx'
 import { Badge, Profit, Segmented } from '../components/ui.jsx'
 import { compareSessions, isActive, isTournament, minutesPlayed, ordinal, profit } from '../lib/sessions.js'
 import { netProfit } from '../lib/stats.js'
-import { formatDay, formatDuration, formatMonth, todayKey } from '../lib/time.js'
+import { formatDuration, formatMonth, todayKey } from '../lib/time.js'
 
 /**
  * The sheet: sessions in play at the top, the start buttons, then every
@@ -38,24 +39,30 @@ export default function Sessions({ sessions, installed, backupDue, onStart, onAd
       {!installed && <InstallBanner />}
 
       {backupDue && (
-        <button type="button" onClick={onBackup} className="block w-full rounded-2xl bg-surface p-3.5 text-left text-sm">
+        <button type="button" onClick={onBackup} className="block w-full card p-3.5 text-left text-sm">
           <span className="font-semibold text-accent">Time for a backup.</span>{' '}
           <span className="text-muted">Your sessions only live on this phone — tap to save a copy.</span>
         </button>
       )}
 
-      {/* Totals strip */}
+      {/* Headline: all-time result, with this month and volume underneath. */}
       {done.length > 0 && (
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-2xl bg-surface p-3.5">
-            <div className="text-xs font-medium uppercase tracking-wide text-faint">All time</div>
-            <Profit cents={netProfit(done)} className="mt-1 block text-2xl font-semibold" />
-            <div className="text-xs text-muted">{done.length} sessions</div>
-          </div>
-          <div className="rounded-2xl bg-surface p-3.5">
-            <div className="text-xs font-medium uppercase tracking-wide text-faint">This month</div>
-            <Profit cents={monthNet} className="mt-1 block text-2xl font-semibold" />
-            <div className="text-xs text-muted">{done.filter((s) => s.date.startsWith(thisMonth)).length} sessions</div>
+        <div className="card-hero p-5">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-accent/80">All-time profit</div>
+          <Profit cents={netProfit(done)} className="mt-1 block text-[40px] leading-tight font-bold tracking-tight" />
+          <div className="mt-4 grid grid-cols-3 gap-2 border-t border-white/5 pt-3.5 text-sm">
+            <div>
+              <div className="text-xs text-faint">This month</div>
+              <Profit cents={monthNet} className="font-semibold" />
+            </div>
+            <div>
+              <div className="text-xs text-faint">Sessions</div>
+              <div className="num font-semibold">{done.length}</div>
+            </div>
+            <div>
+              <div className="text-xs text-faint">Hours</div>
+              <div className="num font-semibold">{Math.round(done.reduce((h, x) => h + (minutesPlayed(x) || 0), 0) / 60)}</div>
+            </div>
           </div>
         </div>
       )}
@@ -65,8 +72,8 @@ export default function Sessions({ sessions, installed, backupDue, onStart, onAd
       ))}
 
       {/* Start — the "I just sat down" buttons */}
-      <div className="space-y-2.5 rounded-2xl bg-surface p-4">
-        <div className="text-sm font-semibold">Start a session</div>
+      <div className="space-y-2.5 card p-4">
+        <div className="text-xs font-semibold uppercase tracking-[0.14em] text-faint">Start a session</div>
         <Segmented
           size="sm"
           value={setting}
@@ -77,10 +84,10 @@ export default function Sessions({ sessions, installed, backupDue, onStart, onAd
           ]}
         />
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => onStart('cash', setting)} className="rounded-xl bg-accent py-3 font-semibold text-accent-ink active:opacity-80">
+          <button type="button" onClick={() => onStart('cash', setting)} className="rounded-2xl btn-gold py-3.5 text-[17px] font-bold">
             Cash game
           </button>
-          <button type="button" onClick={() => onStart('tournament', setting)} className="rounded-xl bg-accent py-3 font-semibold text-accent-ink active:opacity-80">
+          <button type="button" onClick={() => onStart('tournament', setting)} className="rounded-2xl btn-gold py-3.5 text-[17px] font-bold">
             Tournament
           </button>
         </div>
@@ -90,19 +97,23 @@ export default function Sessions({ sessions, installed, backupDue, onStart, onAd
       </div>
 
       {done.length === 0 && active.length === 0 && (
-        <p className="px-2 py-6 text-center text-sm text-faint">
-          No sessions yet. Tap <b className="text-muted">Cash game</b> or <b className="text-muted">Tournament</b> when you sit
-          down, or log one you already played.
-        </p>
+        <div className="flex flex-col items-center px-6 pt-4 pb-6 text-center">
+          <Logo className="h-16 w-16 opacity-90 drop-shadow-[0_8px_24px_rgba(227,179,65,0.25)]" />
+          <p className="mt-4 font-semibold">Your results start here</p>
+          <p className="mt-1 text-sm text-faint">
+            Tap <b className="text-muted">Cash game</b> or <b className="text-muted">Tournament</b> when you sit down, or log a
+            session you already played.
+          </p>
+        </div>
       )}
 
       {months.map((m) => (
         <section key={m.key}>
-          <div className="mb-1.5 flex items-baseline justify-between px-1">
-            <h2 className="text-sm font-semibold text-muted">{formatMonth(m.key)}</h2>
+          <div className="mb-2 flex items-baseline justify-between px-1">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-faint">{formatMonth(m.key)}</h2>
             <Profit cents={netProfit(m.sessions)} className="text-sm font-semibold" />
           </div>
-          <ul className="divide-y divide-line overflow-hidden rounded-2xl bg-surface">
+          <ul className="divide-y divide-white/5 overflow-hidden card">
             {m.sessions.map((s) => (
               <SessionRow key={s.id} session={s} onOpen={onOpen} />
             ))}
@@ -122,24 +133,28 @@ function SessionRow({ session: s, onOpen }) {
     mins !== null ? formatDuration(mins) : null,
   ].filter(Boolean)
 
+  const day = new Date(`${s.date}T12:00:00`)
   return (
     <li>
-      <button type="button" onClick={() => onOpen(s)} className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-surface-2">
+      <button type="button" onClick={() => onOpen(s)} className="flex w-full items-center gap-3 px-3.5 py-3 text-left active:bg-surface-2">
+        {/* Calendar tile: the date is how she will look a session up. */}
+        <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-surface-2 leading-none">
+          <span className="text-[10px] font-semibold uppercase text-faint">{day.toLocaleDateString('en-CA', { weekday: 'short' })}</span>
+          <span className="num mt-0.5 text-lg font-bold">{day.getDate()}</span>
+        </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="truncate font-medium">{s.venue || (tourney ? 'Tournament' : 'Cash game')}</span>
+            <span className="truncate font-semibold">{s.venue || (tourney ? 'Tournament' : 'Cash game')}</span>
             {tourney && <Badge>MTT</Badge>}
             {s.setting === 'online' && <Badge>Online</Badge>}
-            {s.event && <Badge tone="accent">{s.event}</Badge>}
           </div>
-          <div className="truncate text-xs text-muted">
-            {formatDay(s.date)}
-            {detail.length ? ` · ${detail.join(' · ')}` : ''}
+          <div className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted">
+            {s.event && <Badge tone="accent">{s.event}</Badge>}
+            <span className="truncate">{detail.join(' · ')}</span>
           </div>
         </div>
-        <Profit cents={profit(s)} className="font-semibold" />
+        <Profit cents={profit(s)} className="font-bold" />
       </button>
     </li>
   )
 }
-

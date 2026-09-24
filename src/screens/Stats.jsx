@@ -93,8 +93,8 @@ export default function Stats({ sessions }) {
       )}
 
       {filtered.length > 0 && (
-        <div className="rounded-2xl bg-surface p-3.5">
-          <div className="mb-2 text-sm font-semibold">Running total</div>
+        <div className="card p-3.5">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Running total</div>
           <ProfitChart points={points} />
         </div>
       )}
@@ -114,9 +114,9 @@ function CashStats({ sessions }) {
   const s = cashStats(sessions)
   return (
     <>
-      <div className="rounded-2xl bg-surface p-4">
-        <div className="text-xs font-medium uppercase tracking-wide text-faint">Net profit</div>
-        <Profit cents={s.net} className="mt-1 block text-4xl font-bold" />
+      <div className="card-hero p-5">
+        <div className="text-xs font-semibold uppercase tracking-[0.14em] text-accent/80">Net profit</div>
+        <Profit cents={s.net} className="mt-1 block text-[40px] leading-tight font-bold tracking-tight" />
         <div className="mt-1 text-sm text-muted">
           {s.count} sessions{s.minutes ? ` · ${formatDuration(s.minutes)} played` : ''}
         </div>
@@ -143,9 +143,9 @@ function TournamentStats({ sessions }) {
   const t = tournamentStats(sessions)
   return (
     <>
-      <div className="rounded-2xl bg-surface p-4">
-        <div className="text-xs font-medium uppercase tracking-wide text-faint">Net profit</div>
-        <Profit cents={t.net} className="mt-1 block text-4xl font-bold" />
+      <div className="card-hero p-5">
+        <div className="text-xs font-semibold uppercase tracking-[0.14em] text-accent/80">Net profit</div>
+        <Profit cents={t.net} className="mt-1 block text-[40px] leading-tight font-bold tracking-tight" />
         <div className="mt-1 text-sm text-muted">
           {t.count} tournaments · {formatMoney(t.spent)} in · {formatMoney(t.won)} won
         </div>
@@ -166,8 +166,8 @@ function TournamentStats({ sessions }) {
 function Breakdown({ title, rows, format }) {
   if (rows.length < 2) return null // a one-row breakdown repeats the headline
   return (
-    <div className="rounded-2xl bg-surface p-3.5">
-      <div className="mb-2 text-sm font-semibold">{title}</div>
+    <div className="card p-3.5">
+      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">{title}</div>
       {/* Fixed layout with set widths: in an auto table the name column is the
           one that gets squeezed, down to "C…" for every casino. */}
       <table className="num w-full table-fixed text-sm">
@@ -185,7 +185,7 @@ function Breakdown({ title, rows, format }) {
             <th className="pb-1.5 text-right font-medium">Profit</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-line">
+        <tbody className="divide-y divide-white/5">
           {rows.map((r) => (
             <tr key={r.label}>
               <td className="truncate py-2 pr-2">{r.label}</td>

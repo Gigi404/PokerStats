@@ -9,7 +9,7 @@ const TABS = [
 
 export default function BottomNav({ tab, onChange }) {
   return (
-    <nav className="pb-safe fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/95 backdrop-blur">
+    <nav className="pb-safe fixed inset-x-0 bottom-0 z-20 border-t border-white/5 bg-bg/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-lg">
         {TABS.map((t) => {
           const active = t.id === tab
@@ -19,13 +19,16 @@ export default function BottomNav({ tab, onChange }) {
               type="button"
               onClick={() => onChange(t.id)}
               aria-current={active ? 'page' : undefined}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
+              className={`flex flex-1 flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-semibold ${
                 active ? 'text-accent' : 'text-faint'
               }`}
             >
+              {/* Active tab sits in a soft pill, like the native tab bars. */}
+              <span className={`flex h-8 w-14 items-center justify-center rounded-full transition-colors ${active ? 'bg-accent/15' : ''}`}>
               <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d={t.icon} />
               </svg>
+              </span>
               {t.label}
             </button>
           )

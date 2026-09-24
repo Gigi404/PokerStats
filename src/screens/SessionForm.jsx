@@ -74,7 +74,7 @@ export default function SessionForm({ session, mode: initialMode, sessions, onSa
   const title = { new: 'Log a session', start: 'Start a session', edit: 'Edit session', finish: tourney ? 'Tournament over' : 'Cash out' }[mode]
 
   return (
-    <div className="fixed inset-0 z-30 overflow-y-auto bg-bg">
+    <div className="sheet-in fixed inset-0 z-30 overflow-y-auto bg-bg">
       <header className="pt-safe sticky top-0 z-10 border-b border-line bg-bg/95 backdrop-blur">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
           <button type="button" onClick={onClose} className="py-1 pr-3 text-muted">
@@ -225,7 +225,7 @@ export default function SessionForm({ session, mode: initialMode, sessions, onSa
                 type="button"
                 onClick={() => set({ event: draft.event === ev ? '' : ev })}
                 className={`rounded-full px-3 py-1.5 text-sm ${
-                  draft.event === ev ? 'bg-accent font-medium text-accent-ink' : 'bg-surface-2 text-muted'
+                  draft.event === ev ? 'btn-gold font-medium' : 'bg-surface-2 text-muted'
                 }`}
               >
                 {ev}
@@ -253,7 +253,7 @@ export default function SessionForm({ session, mode: initialMode, sessions, onSa
         {mode === 'edit' && (
           <div className="pt-2">
             {confirmDelete ? (
-              <div className="flex items-center gap-2 rounded-2xl bg-surface p-3">
+              <div className="flex items-center gap-2 card p-3">
                 <span className="flex-1 text-sm">Delete this session for good?</span>
                 <button type="button" onClick={() => setConfirmDelete(false)} className="px-3 py-2 text-sm text-muted">
                   Keep
@@ -295,7 +295,7 @@ export default function SessionForm({ session, mode: initialMode, sessions, onSa
                   Finish now
                 </button>
               )}
-              <button type="submit" disabled={saving} className="flex-1 rounded-xl bg-accent py-3 font-semibold text-accent-ink active:opacity-80 disabled:opacity-50">
+              <button type="submit" disabled={saving} className="flex-1 rounded-xl btn-gold py-3 font-semibold text-accent-ink active:opacity-80 disabled:opacity-50">
                 {mode === 'start' ? 'Start' : mode === 'finish' ? 'Save result' : 'Save'}
               </button>
             </div>
@@ -309,7 +309,7 @@ export default function SessionForm({ session, mode: initialMode, sessions, onSa
 /** Place / entrants / prize / bounties. */
 function TournamentResult({ draft, set, autoFocus }) {
   return (
-    <div className="space-y-3 rounded-2xl bg-surface p-3.5">
+    <div className="space-y-3 card p-3.5">
       <div className="text-sm font-semibold">Result</div>
       <div className="grid grid-cols-2 gap-2">
         <Field label="Finished">

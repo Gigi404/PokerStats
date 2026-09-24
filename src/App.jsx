@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import BottomNav from './components/BottomNav.jsx'
+import Logo from './components/Logo.jsx'
 import useSessions from './hooks/useSessions.js'
 import * as repo from './lib/repo.js'
 import { newSession, startSession } from './lib/sessions.js'
@@ -65,12 +66,16 @@ export default function App() {
   return (
     <div className="min-h-dvh">
       <header className="pt-safe mx-auto max-w-lg px-4">
-        <h1 className="pt-4 pb-3 text-2xl font-bold tracking-tight">
-          {{ sessions: 'PokerStats', stats: 'Stats', more: 'Backup' }[tab]}
-        </h1>
+        <div className="flex items-center gap-2.5 pt-4 pb-4">
+          <Logo className="h-8 w-8" />
+          <h1 className="text-[26px] font-bold tracking-tight">
+            {{ sessions: 'PokerStats', stats: 'Stats', more: 'Backup' }[tab]}
+          </h1>
+        </div>
       </header>
 
-      <main className="mx-auto max-w-lg px-4 pb-28">
+      {/* Keyed by tab so each switch replays the fade-up. */}
+      <main key={tab} className="fade-up mx-auto max-w-lg px-4 pb-28">
         {status === 'loading' ? null : tab === 'sessions' ? (
           <Sessions
             sessions={sessions}

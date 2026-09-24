@@ -67,3 +67,89 @@ input[type='time'] {
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+/*
+  Polish layer.
+
+  The page sits on a faint felt-green glow rather than flat black, cards get a
+  hairline edge and a top highlight so they read as raised, and every tappable
+  thing gives a small press response — the difference between a web page and
+  something that feels like an app in the hand.
+*/
+/* Not background-attachment: fixed — iOS Safari ignores it and repaints badly.
+   A glow sized to the top of the page does the same job there. */
+body {
+  background:
+    radial-gradient(120% 100% at 50% 0%, #173a2c 0%, rgba(11, 18, 16, 0) 70%) no-repeat top / 100% 520px,
+    var(--color-bg);
+}
+
+@utility card {
+  border-radius: 1.25rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0)) , var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+}
+
+/* The headline card on each tab: a warm glow from the accent. */
+@utility card-hero {
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(90% 120% at 0% 0%, rgba(227, 179, 65, 0.16), rgba(227, 179, 65, 0) 60%),
+    linear-gradient(180deg, #1a2d25, #13201b);
+  border: 1px solid rgba(227, 179, 65, 0.18);
+  box-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.7);
+}
+
+/* Primary buttons: the chip gold with a slight bevel. */
+@utility btn-gold {
+  background: linear-gradient(180deg, #ecc35a, #d9a52f);
+  color: var(--color-accent-ink);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 6px 16px -8px rgba(227, 179, 65, 0.6);
+}
+
+button {
+  transition: transform 120ms ease, background-color 150ms ease, opacity 150ms ease;
+}
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* The session sheet slides up like a native modal. */
+@keyframes sheet-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.sheet-in {
+  animation: sheet-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes fade-up {
+  from {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.fade-up {
+  animation: fade-up 260ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-in,
+  .fade-up {
+    animation: none;
+  }
+  button:active:not(:disabled) {
+    transform: none;
+  }
+}

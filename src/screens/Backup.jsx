@@ -58,7 +58,7 @@ export default function Backup({ sessions, lastBackup, onBackedUp, onRestored })
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl bg-surface p-4 text-sm">
+      <div className="card p-4 text-sm">
         <div className="font-semibold">Your sessions live on this phone only</div>
         <p className="mt-1 text-muted">
           Nothing is sent anywhere. That keeps them private, but it also means a backup file is the only copy if the
@@ -69,7 +69,7 @@ export default function Backup({ sessions, lastBackup, onBackedUp, onRestored })
         </p>
       </div>
 
-      <button type="button" onClick={backup} disabled={!sessions.length} className="w-full rounded-xl bg-accent py-3.5 font-semibold text-accent-ink disabled:opacity-40">
+      <button type="button" onClick={backup} disabled={!sessions.length} className="w-full rounded-xl btn-gold py-3.5 font-semibold text-accent-ink disabled:opacity-40">
         Save a backup
       </button>
       <button type="button" onClick={exportCsv} disabled={!sessions.length} className="w-full rounded-xl bg-surface-2 py-3.5 font-semibold disabled:opacity-40">
@@ -78,7 +78,7 @@ export default function Backup({ sessions, lastBackup, onBackedUp, onRestored })
 
       {message && <p className={`rounded-xl p-3 text-sm ${message.tone === 'ok' ? 'bg-gain/10 text-gain' : 'bg-loss/10 text-loss'}`}>{message.text}</p>}
 
-      <div className="rounded-2xl bg-surface p-4 text-sm">
+      <div className="card p-4 text-sm">
         <div className="font-semibold">Restore from a backup</div>
         <p className="mt-1 text-muted">Replaces everything in the app with the sessions in the backup file.</p>
         {pending ? (

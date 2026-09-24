@@ -12,7 +12,7 @@ import { formatSigned } from '../lib/money.js'
  */
 export function Segmented({ options, value, onChange, size = 'md' }) {
   return (
-    <div className="flex rounded-xl bg-surface-2 p-1" role="radiogroup">
+    <div className="flex rounded-2xl border border-white/5 bg-surface-2 p-1" role="radiogroup">
       {options.map((o) => {
         const selected = o.value === value
         return (
@@ -22,9 +22,9 @@ export function Segmented({ options, value, onChange, size = 'md' }) {
             role="radio"
             aria-checked={selected}
             onClick={() => onChange(o.value)}
-            className={`flex-1 rounded-lg font-medium transition-colors ${
+            className={`flex-1 rounded-xl font-semibold transition-colors ${
               size === 'sm' ? 'py-1.5 text-sm' : 'py-2.5 text-[15px]'
-            } ${selected ? 'bg-accent text-accent-ink' : 'text-muted active:bg-line'}`}
+            } ${selected ? 'btn-gold' : 'text-muted active:bg-line'}`}
           >
             {o.label}
           </button>
@@ -61,7 +61,7 @@ export function Profit({ cents, className = '' }) {
 /** A stat tile: small label over a large value. */
 export function Tile({ label, children, sub }) {
   return (
-    <div className="rounded-2xl bg-surface p-3.5">
+    <div className="card p-3.5">
       <div className="text-xs font-medium uppercase tracking-wide text-faint">{label}</div>
       <div className="num mt-1 text-xl font-semibold">{children}</div>
       {sub && <div className="mt-0.5 text-xs text-muted">{sub}</div>}

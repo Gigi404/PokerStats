@@ -39,7 +39,7 @@ export default function ActiveSession({ session, onRebuy, onFinish, onOpen }) {
   const lastBuyIn = session.buyIns.at(-1)
 
   return (
-    <div className="rounded-2xl border border-accent/50 bg-surface p-4">
+    <div className="card-hero p-4 ring-1 ring-accent/30">
       <button type="button" onClick={() => onOpen(session)} className="block w-full text-left">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-accent">
           <span className="h-2 w-2 animate-pulse rounded-full bg-accent" />
@@ -76,7 +76,7 @@ export default function ActiveSession({ session, onRebuy, onFinish, onOpen }) {
             onChange={(e) => setAmount(e.target.value)}
             aria-label={tourney ? 'Re-entry or add-on amount' : 'Rebuy amount'}
           />
-          <button type="submit" className="rounded-xl bg-accent px-4 font-semibold text-accent-ink">
+          <button type="submit" className="rounded-xl btn-gold px-4 font-semibold text-accent-ink">
             Add
           </button>
           <button type="button" onClick={() => setRebuying(false)} className="rounded-xl px-3 text-muted">
@@ -98,7 +98,7 @@ export default function ActiveSession({ session, onRebuy, onFinish, onOpen }) {
           <button
             type="button"
             onClick={() => onFinish(session)}
-            className="rounded-xl bg-accent py-3 font-semibold text-accent-ink active:opacity-80"
+            className="rounded-xl btn-gold py-3 font-semibold text-accent-ink active:opacity-80"
           >
             {tourney ? 'Finished' : 'Cash out'}
           </button>

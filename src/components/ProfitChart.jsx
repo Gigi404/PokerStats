@@ -47,6 +47,10 @@ export default function ProfitChart({ points }) {
   const y = (cents) => PAD.top + (1 - (cents - lo) / (hi - lo)) * plotH
 
   const path = totals.map((t, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(t).toFixed(1)}`).join('')
+  // Area between the line and break-even: a soft wash that makes the shape read
+  // at a glance without adding a second encoding.
+  const zeroY = y(Math.min(Math.max(0, lo), hi)).toFixed(1)
+  const area = `${path}L${x(totals.length - 1).toFixed(1)},${zeroY}L${x(0).toFixed(1)},${zeroY}Z`
 
   /** Pointer x → nearest session index (1-based into totals; 0 is the origin). */
   const pick = (event) => {
@@ -60,6 +64,8 @@ export default function ProfitChart({ points }) {
   const ax = active ? x(active) : 0
   // Keep the tooltip inside the card: flip it to the left of the crosshair past halfway.
   const tipLeft = ax > width / 2
+  // …and below the point when the point is in the top half, so it never hides it.
+  const tipBelow = hit ? y(hit.total) < HEIGHT / 2 : false
 
   return (
     <div ref={wrapRef} className="relative select-none">
@@ -97,6 +103,13 @@ export default function ProfitChart({ points }) {
           {formatDay(points.at(-1).session.date, true)}
         </text>
 
+        <defs>
+          <linearGradient id="ps-area" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={area} fill="url(#ps-area)" />
         <path d={path} fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
 
         {/* Endpoint marker, and the crosshair when reading a point */}
@@ -111,7 +124,9 @@ export default function ProfitChart({ points }) {
 
       {hit && (
         <div
-          className="pointer-events-none absolute top-1 w-44 rounded-xl border border-line bg-surface-2 p-2.5 text-xs shadow-lg"
+          className={`pointer-events-none absolute w-44 rounded-xl border border-white/10 bg-surface-2/95 p-2.5 text-xs shadow-lg backdrop-blur ${
+            tipBelow ? 'bottom-6' : 'top-1'
+          }`}
           style={tipLeft ? { left: Math.max(0, ax - 184) } : { left: ax + 8 }}
         >
           <div className="font-semibold">{formatDay(hit.session.date, true)}</div>
