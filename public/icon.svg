@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Same mark as tools/generate_icons.py: a gold chip with a spade. -->
+  <rect width="100" height="100" rx="22" fill="#0b1210"/>
+  <circle cx="50" cy="50" r="42" fill="#e3b341"/>
+  <g fill="#13201b">
+    <path id="notch" d="M91.3 42 L91.3 58 L82.8 55.7 L82.8 44.3 Z" transform="rotate(0 50 50)"/>
+    <use href="#notch" transform="rotate(60 50 50)"/>
+    <use href="#notch" transform="rotate(120 50 50)"/>
+    <use href="#notch" transform="rotate(180 50 50)"/>
+    <use href="#notch" transform="rotate(240 50 50)"/>
+    <use href="#notch" transform="rotate(300 50 50)"/>
+    <circle cx="50" cy="50" r="27.7"/>
+  </g>
+  <g fill="#e3b341">
+    <circle cx="42.5" cy="51.6" r="7.9"/>
+    <circle cx="57.5" cy="51.6" r="7.9"/>
+    <path d="M50 33.6 L34.8 50.4 L65.2 50.4 Z"/>
+    <path d="M50 51.6 L44.7 65.8 L55.3 65.8 Z"/>
+  </g>
+</svg>

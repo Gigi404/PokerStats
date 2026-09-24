@@ -1,0 +1,36 @@
+/**
+ * The tab bar. Sits above the iPhone home indicator via pb-safe.
+ */
+const TABS = [
+  { id: 'sessions', label: 'Sessions', icon: 'M4 6h16M4 12h16M4 18h10' },
+  { id: 'stats', label: 'Stats', icon: 'M4 19V9m6 10V5m6 14v-7m4 7H3' },
+  { id: 'more', label: 'Backup', icon: 'M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2' },
+]
+
+export default function BottomNav({ tab, onChange }) {
+  return (
+    <nav className="pb-safe fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/95 backdrop-blur">
+      <div className="mx-auto flex max-w-lg">
+        {TABS.map((t) => {
+          const active = t.id === tab
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => onChange(t.id)}
+              aria-current={active ? 'page' : undefined}
+              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
+                active ? 'text-accent' : 'text-faint'
+              }`}
+            >
+              <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d={t.icon} />
+              </svg>
+              {t.label}
+            </button>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}

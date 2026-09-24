@@ -1,0 +1,69 @@
+@import 'tailwindcss';
+
+/*
+  Theme — dark felt with a chip-gold accent.
+
+  Colours are tokens so every screen draws from the same few values. Profit and
+  loss get their own pair (gain / loss) that is never reused for anything else,
+  and every signed amount also carries a written + / − so the green/red is
+  never the only signal.
+*/
+@theme {
+  --color-bg: #0b1210;
+  --color-surface: #13201b;
+  --color-surface-2: #1b2c25;
+  --color-line: #26392f;
+  --color-ink: #e8efe9;
+  --color-muted: #9fb3a8;
+  --color-faint: #6c8277;
+  --color-accent: #e3b341;
+  --color-accent-ink: #1a1405;
+  --color-gain: #5ad48a;
+  --color-loss: #f2777a;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  /* No rubber-band scrolling of the whole app shell on iOS. */
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tabular figures so columns of money line up. */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+  iOS zooms the page when a focused input's font is under 16px, and does not
+  zoom back out. Every field in this app is therefore at least 16px.
+*/
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+/* The native date/time pickers render with a light background unless told. */
+input[type='date'],
+input[type='time'] {
+  color-scheme: dark;
+  min-height: 44px;
+}
+
+/* Safe-area helpers for the notch and the home bar. */
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
