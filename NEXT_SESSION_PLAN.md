@@ -10,6 +10,12 @@ DO NOW
               | numbers moved by themselves. Only a "nothing changed" publish has
               | been seen; the first real one was started by hand.
 
+COMING NEXT
+🟡 review     | decided 10-06: tapping a tournament in Online opens a full review —
+              | stack graph, stats in that tournament, key hands with cards, leak
+              | counts. Built from PokerEdge (its brief has the plan); the app
+              | side is a new screen plus summary schema v2.
+
 NEEDS YOUR CALL
 🟡 next       | what she asks for once she uses it. Still open from 09-24:
               | memorable hands (the one field deferred from day one).
