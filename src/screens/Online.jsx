@@ -14,6 +14,7 @@ import {
   tournamentCurve,
 } from '../lib/online.js'
 import { ageLabel } from '../lib/playground.js'
+import { Recent, Review } from './OnlineReview.jsx'
 import { formatDay } from '../lib/time.js'
 
 const usdCents = (cents) => formatSignedUSD(cents / 100)
@@ -31,7 +32,10 @@ function USD({ value, className = '' }) {
  */
 export default function Online() {
   const online = useOnline()
-  const [view, setView] = useState('overview')
+  // Recent first: it is the "how did we play" view, the reason the tab exists.
+  // Files published before the review existed have no recent_days — those
+  // open on Overview instead.
+  const [view, setView] = useState('recent')
 
   if (online.status === 'loading') {
     return <p className="py-16 text-center text-sm text-faint">Opening online results…</p>
@@ -51,20 +55,31 @@ export default function Online() {
   }
 
   const { data } = online
+  const hasRecent = Array.isArray(data.recent_days)
+  const current = view === 'recent' && !hasRecent ? 'overview' : view
   return (
     <div className="space-y-4">
       <Segmented
         size="sm"
-        value={view}
+        value={current}
         onChange={setView}
         options={[
+          ...(hasRecent ? [{ value: 'recent', label: 'Recent' }] : []),
           { value: 'overview', label: 'Overview' },
-          { value: 'tournaments', label: 'Tournaments' },
+          { value: 'tournaments', label: 'History' },
           { value: 'game', label: 'My game' },
         ]}
       />
 
-      {view === 'overview' ? <Overview data={data} /> : view === 'tournaments' ? <History data={data} /> : <MyGame data={data} />}
+      {current === 'recent' ? (
+        <Recent days={data.recent_days} history={data.tournaments.history} />
+      ) : current === 'overview' ? (
+        <Overview data={data} />
+      ) : current === 'tournaments' ? (
+        <History data={data} />
+      ) : (
+        <MyGame data={data} />
+      )}
 
       <p className="px-1 text-center text-xs text-faint">
         PokerStars · {data.meta.hero} · sent {ageLabel(online.publishedAt)}
@@ -238,7 +253,13 @@ function Table({ title, rows, rateLabel }) {
 function History({ data }) {
   const [format, setFormat] = useState('')
   const [open, setOpen] = useState(null)
+  const [review, setReview] = useState(null)
   const all = data.tournaments.history
+  // Tournaments from the last days played carry a full review.
+  const reviews = useMemo(
+    () => Object.fromEntries((data.recent_days || []).flatMap((d) => d.tournaments.map((r) => [r.id, r]))),
+    [data],
+  )
   const byId = useMemo(() => Object.fromEntries(all.map((t) => [t.id, t])), [all])
   const formats = useMemo(() => [...new Set(all.map((t) => t.format))], [all])
   const rows = useMemo(() => all.filter((t) => !format || t.format === format).slice().reverse(), [all, format])
@@ -282,13 +303,24 @@ function History({ data }) {
       {/* Portalled to <body>: the tab's <main> animates with a transform, which
           would trap a fixed-position sheet inside it (the session sheet avoids
           this by living in App, outside <main>). */}
-      {open && createPortal(<Detail t={open} byId={byId} onOpen={setOpen} onClose={() => setOpen(null)} />, document.body)}
+      {open &&
+        createPortal(
+          <Detail
+            t={open}
+            byId={byId}
+            onOpen={setOpen}
+            onClose={() => setOpen(null)}
+            onReview={reviews[open.id] ? () => { setReview(reviews[open.id]); setOpen(null) } : null}
+          />,
+          document.body,
+        )}
+      {review && createPortal(<Review review={review} entry={byId[review.id]} onClose={() => setReview(null)} />, document.body)}
     </>
   )
 }
 
 /** One tournament, as a bottom sheet. */
-function Detail({ t, byId, onOpen, onClose }) {
+function Detail({ t, byId, onOpen, onClose, onReview }) {
   // Escape closes it on a computer; on the phone, tap outside or Close.
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -347,6 +379,12 @@ function Detail({ t, byId, onOpen, onClose }) {
           {sourceNote && <p>{sourceNote}</p>}
           <p className="text-faint">Tournament #{t.id}</p>
         </div>
+
+        {onReview && (
+          <button type="button" onClick={onReview} className="btn-gold mt-4 w-full rounded-xl py-3 font-semibold">
+            Open full review
+          </button>
+        )}
       </div>
     </div>
   )
