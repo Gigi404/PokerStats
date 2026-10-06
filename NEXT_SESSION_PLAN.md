@@ -2,42 +2,41 @@
 
 <!-- BRIEF:START -->
 DO NOW
-🟢 nothing   | Nothing is urgent. The app is live and installed on her iPhone;
-             | the next work starts from whatever she asks for after real use.
-🟡 check     | Fri 09-25, any time after 06:00: open the Playground tab (or
-             | gigi404.github.io/PokerStats/data/playground.json) and confirm it
-             | says "updated today at 6:0x". That is the first UNATTENDED
-             | morning refresh — so far it has only run on pushes. If it did not
-             | run: gh run list -R Gigi404/PokerStats.
-🟡 v0.2.0    | Confirm her phone picked up v0.2.0: the Backup tab footer shows
-             | the version. If still v0.1.0, swipe the app closed and reopen.
+🟡 phones     | put v0.3.0 on both phones: open with signal, swipe closed, reopen
+              | (Backup tab footer says v0.3.0), tap Online, type the passphrase
+              | once. Never yet tried on a real iPhone — check the three views
+              | fit at phone width and that a tournament's detail sheet opens.
+🟡 after play | after the next real PokerStars session, open Online and confirm the
+              | numbers moved by themselves. Only a "nothing changed" publish has
+              | been seen; the first real one was started by hand.
 
 NEEDS YOUR CALL
-🟡 next      | What to build next, once she has used it: memorable hands (the
-             | one field deferred from day one), or optional backup/sync to the
-             | beast (would mean Tailscale on her phone — rejected for now).
+🟡 next       | what she asks for once she uses it. Still open from 09-24:
+              | memorable hands (the one field deferred from day one).
 
 CARRIED OVER — still open, still correct
-🟡 backup    | Her sessions exist only on her phone. Worth nudging her to take
-             | one backup (Backup tab → Save a backup → Files) after a few
-             | sessions; the app also reminds her every 10.
-🟡 laptop    | PokerStats and gigi404.github.io are cloned only on the beast
-             | (plus GitHub). Clone to the laptop only if you ever want to work
-             | on them there.
+🟡 backup     | her live sessions exist only on her phone. Nudge her to take one
+              | backup (Backup tab → Save a backup → Files); the app reminds her
+              | every 10 changes.
+🟢 laptop     | PokerStats is now cloned on the laptop too (`C:\Dev\Apps              | PokerStats`, plus a `beast` remote). gigi404.github.io is still
+              | beast-only.
 
 SETTLED
-✅ hosting   | GitHub Pages (public repo), data only on her phone, no beast
-             | backend. gigi404.github.io redirects every casing to /PokerStats/.
-✅ scope     | CAD only. Cash + tournament × live + online. Home games are
-             | ordinary sessions (tag "Home game"). No backfilling of old
-             | sessions — forward from 2026-09-24.
-✅ playground| Playground tab is info only (no "log this tournament"), English,
-             | Playground only, refreshed once a morning.
+✅ hosting    | GitHub Pages, public repo (free plan — private would unpublish the
+              | site). Her data never leaves her phone.
+✅ online     | PokerStars results arrive as an encrypted file on the `data` branch,
+              | unlocked by a passphrase typed once per phone. Shown in US$, never
+              | added to the CAD live results. Live sessions stay manual.
+✅ scope      | CAD for live. Cash + tournament × live + online. Home games are
+              | ordinary sessions. No backfilling of old sessions.
+✅ playground | info only, English, Playground only, refreshed once a morning.
 
 RUNS ITSELF
-⏳ 06:00     | Daily GitHub Actions run (10:00 UTC) re-fetches Playground's
-             | jackpots, schedule and promos and redeploys; a keepalive job
-             | stops GitHub disabling the schedule in quiet months.
-⏳ updates   | Every push to main redeploys; her installed app picks it up on
-             | its next open with signal.
+⏳ each sync  | the beast publishes new online results whenever a PokerEdge sync
+              | lands (07:30 daily fallback); the phone picks them up on its next
+              | open with signal. No redeploy involved.
+⏳ 06:00      | daily GitHub Actions run (10:00 UTC) refreshes Playground's data
+              | and redeploys; a keepalive job stops GitHub disabling it.
+⏳ updates    | every push to main redeploys; installed apps pick it up on the
+              | open after next.
 <!-- BRIEF:END -->

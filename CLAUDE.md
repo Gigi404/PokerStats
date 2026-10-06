@@ -5,9 +5,10 @@ built for the owner's girlfriend's **iPhone**. Installed from Safari via
 Share → Add to Home Screen. Started 2026-09-24.
 
 ## Architecture
-- **Frontend only.** React 19 + Vite 7 + Tailwind 4 + vite-plugin-pwa. No backend,
-  no network calls: every session lives in **IndexedDB on her phone**
-  (`src/lib/db.js`, raw API, pattern copied from Ritual).
+- **Frontend only.** React 19 + Vite 7 + Tailwind 4 + vite-plugin-pwa. No backend:
+  every session lives in **IndexedDB on her phone** (`src/lib/db.js`, raw API,
+  pattern copied from Ritual). The only network reads are two data files: the
+  Playground schedule and the encrypted online results (both below).
 - **Hosting: GitHub Pages** at `https://gigi404.github.io/PokerStats/`, deployed by
   `.github/workflows/deploy.yml` on push to `main`. Chosen because her phone has
   never been on the tailnet — a public static host needs no Tailscale and exposes
@@ -47,6 +48,30 @@ series, the tournament schedule (daily / series / satellites) and poker promos.
   60-days-without-commits rule can't silently stop the refresh.
 - Service worker: NetworkFirst for the data file only (not precached).
 - Owner decisions: info only (no "log this tournament"), English, Playground only.
+
+## Online tab (v0.3.0)
+Read-only results of the **shared PokerStars account** (Kmpat), which nobody types
+in. PokerEdge builds a summary after each session; the beast encrypts it and
+commits it to this repo's orphan **`data` branch** as `online.enc.json`
+(PokerEdge `tools/publish_summary.py`, fired by `pokeredge-publish.path` when a
+sync lands, plus a 07:30 daily fallback).
+- The app fetches it from `raw.githubusercontent.com` (CORS `*`), so a data update
+  needs **no site redeploy** and the deploy workflow ignores the branch.
+- Envelope: `{v, alg:'AES-256-GCM', kdf:'PBKDF2-SHA256', iter, salt, iv, ct,
+  published_at}`; `ct` = ciphertext‖tag, exactly what WebCrypto wants, so no crypto
+  library is bundled (`src/lib/online.js`). Only `published_at` is readable
+  without the key.
+- **Passphrase entered once per phone**, kept in the META store; the derived
+  non-extractable `CryptoKey` is cached per salt so most opens skip the ~1s PBKDF2
+  (`src/hooks/useOnline.js`). "Lock on this phone" removes both.
+- Amounts are **USD shown as "US$"** and never mixed with the CAD live results.
+- Views: Overview · Tournaments (history + detail sheet with satellite ↔ seat
+  links) · My game (stats vs typical ranges, opening % by seat, stack depth, leak
+  trends, tickets). The ranges ship in the file — the app has no poker knowledge.
+- Service worker: NetworkFirst for the file, so the tab works offline from the
+  last copy. `src/lib/online.fixture.json` was encrypted by PokerEdge's Python
+  publisher, so the tests prove the phone opens what the beast sends.
+- `VITE_ONLINE_URL` exists only for local test builds; production never sets it.
 
 ## Backup
 Data is phone-only, so the Backup tab exports a JSON backup (restorable) and a
@@ -100,6 +125,29 @@ backfilling, forward only).
   quoting twice (no damage); writing the script/commit message locally and
   `scp`-ing it works, as the Apps-level notes already say.
 
+### 2026-10-06 — Online tab (v0.3.0)
+Built from the laptop (first time this repo was cloned there; the beast's unpushed
+09-24 wrap commit was pulled in first). See "Online tab" above; the PokerEdge side
+is in PokerEdge's CLAUDE.md, session log 2026-10-05.
+- 28 tests (7 new), lint clean. Checked in Chrome against the real summary
+  encrypted under a throwaway passphrase: wrong passphrase rejected, all three
+  views, the detail sheet and satellite links. Two bugs found that way: the detail
+  sheet was invisible — `<main>`'s fade-up transform traps `position: fixed`
+  children, so it is portalled to `<body>` — and the unlock form blanked while
+  checking.
+- `ProfitChart` gained optional `formatAmount` / `itemLabel` / `emptyText`; the
+  Stats tab is unchanged.
+- Pushed (`712825e`, with `b9a3ea3`), Pages deploy succeeded, live bundle serves
+  v0.3.0; beast pulled level.
+- **Not verified on a real iPhone.** The browser window would not shrink to
+  phone width, so the check ran in the app's ~480px column.
+- Gotcha: under Git Bash, `VITE_ONLINE_URL=/PokerStats/…` was rewritten to
+  `C:/Program Files/Git/PokerStats/…`. Use `MSYS_NO_PATHCONV=1`.
+
 ## Rejected approaches
 - Beast backend (Flask + SQLite): her iPhone would need Tailscale, plus the
   Doze-style tunnel drops seen on the Pixel. Revisit only as optional sync.
+  (Still true 2026-10-06: online results reach the phone as an encrypted file on
+  this repo instead.)
+- Making this repo private (2026-10-06): free plan, so Pages would unpublish and
+  her installed app would stop updating; a paid-plan Pages site is public anyway.
