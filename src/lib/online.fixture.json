@@ -1,0 +1,10 @@
+{
+ "v": 1,
+ "alg": "AES-256-GCM",
+ "kdf": "PBKDF2-SHA256",
+ "iter": 1000,
+ "salt": "Sgy6v/bC5E7paPgYE0XCrw==",
+ "iv": "vbnRj6wRxM9jpznG",
+ "ct": "L7806LCyNCEGONY/uap7OtVh+aQ3NjgNtEnhphyPgS9NQABaO2dBiVu2GNdAlyLTwDZCecjJT4FQiuihHLMKQXHqWEZOO3VNyxCkpj2HRPYEGPTpq9WWw64HiQ0XtIwRTksT6irVWwxhsebg74W3Qn2VRHm6C5YyhRoyuqA=",
+ "published_at": "2026-10-05T23:43:25-04:00"
+}

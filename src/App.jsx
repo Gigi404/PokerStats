@@ -6,6 +6,7 @@ import * as repo from './lib/repo.js'
 import { newSession, startSession } from './lib/sessions.js'
 import { isInstalled } from './lib/storage.js'
 import Backup from './screens/Backup.jsx'
+import Online from './screens/Online.jsx'
 import Playground from './screens/Playground.jsx'
 import SessionForm from './screens/SessionForm.jsx'
 import Sessions from './screens/Sessions.jsx'
@@ -70,7 +71,7 @@ export default function App() {
         <div className="flex items-center gap-2.5 pt-4 pb-4">
           <Logo className="h-8 w-8" />
           <h1 className="text-[26px] font-bold tracking-tight">
-            {{ sessions: 'PokerStats', playground: 'Playground', stats: 'Stats', more: 'Backup' }[tab]}
+            {{ sessions: 'PokerStats', online: 'Online', playground: 'Playground', stats: 'Stats', more: 'Backup' }[tab]}
           </h1>
         </div>
       </header>
@@ -89,6 +90,8 @@ export default function App() {
             onRebuy={handleRebuy}
             onBackup={() => setTab('more')}
           />
+        ) : tab === 'online' ? (
+          <Online />
         ) : tab === 'playground' ? (
           <Playground />
         ) : tab === 'stats' ? (

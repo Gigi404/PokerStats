@@ -16,8 +16,10 @@ const PAD = { top: 12, right: 12, bottom: 22, left: 52 }
  * on the plot to read the nearest session (drag to scrub).
  *
  * @param {{points: {session, result:number, total:number}[]}} props  from stats.cumulative()
+ *   Optional: `formatAmount` (cents → signed text; CAD by default, the Online
+ *   tab passes USD), `itemLabel` ("Session" / "Tournament") and `emptyText`.
  */
-export default function ProfitChart({ points }) {
+export default function ProfitChart({ points, formatAmount = formatSigned, itemLabel = 'Session', emptyText }) {
   const wrapRef = useRef(null)
   const [width, setWidth] = useState(320)
   const [active, setActive] = useState(null)
@@ -35,7 +37,7 @@ export default function ProfitChart({ points }) {
   }, [empty])
 
   if (empty) {
-    return <p className="py-8 text-center text-sm text-faint">The chart appears after two finished sessions.</p>
+    return <p className="py-8 text-center text-sm text-faint">{emptyText || 'The chart appears after two finished sessions.'}</p>
   }
 
   // Include the starting zero so the line begins at "before the first session".
@@ -74,7 +76,7 @@ export default function ProfitChart({ points }) {
         height={HEIGHT}
         className="block touch-pan-y"
         role="img"
-        aria-label={`Cumulative profit over ${points.length} sessions, ending at ${formatSigned(points.at(-1).total)}`}
+        aria-label={`Cumulative profit over ${points.length} ${itemLabel.toLowerCase()}s, ending at ${formatAmount(points.at(-1).total)}`}
         onPointerDown={pick}
         onPointerMove={(e) => (e.pointerType === 'mouse' || e.buttons ? pick(e) : null)}
         onPointerLeave={(e) => (e.pointerType === 'mouse' ? setActive(null) : null)}
@@ -130,14 +132,14 @@ export default function ProfitChart({ points }) {
           style={tipLeft ? { left: Math.max(0, ax - 184) } : { left: ax + 8 }}
         >
           <div className="font-semibold">{formatDay(hit.session.date, true)}</div>
-          <div className="truncate text-muted">{hit.session.venue || hit.session.game || 'Session'}</div>
+          <div className="truncate text-muted">{hit.session.venue || hit.session.game || itemLabel}</div>
           <div className="num mt-1.5 flex justify-between">
-            <span className="text-faint">Session</span>
-            <span className={hit.result >= 0 ? 'text-gain' : 'text-loss'}>{formatSigned(hit.result)}</span>
+            <span className="text-faint">{itemLabel}</span>
+            <span className={hit.result >= 0 ? 'text-gain' : 'text-loss'}>{formatAmount(hit.result)}</span>
           </div>
           <div className="num flex justify-between">
             <span className="text-faint">Running total</span>
-            <span className="font-semibold">{formatSigned(hit.total)}</span>
+            <span className="font-semibold">{formatAmount(hit.total)}</span>
           </div>
         </div>
       )}

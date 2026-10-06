@@ -50,8 +50,8 @@ export default defineConfig({
       },
 
       workbox: {
-        // Precache the build and nothing else: the app never makes a network
-        // request of its own, so there is nothing for runtimeCaching to do.
+        // Precache the build. The only runtime requests are the two data files
+        // below (Playground's schedule and the encrypted online results).
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
 
         // The one runtime rule: Playground's daily data file. NetworkFirst so an
@@ -59,6 +59,20 @@ export default defineConfig({
         // table with none falls back to the last copy (the tab shows its age).
         // Deliberately NOT precached — a precached copy only changes on deploy.
         runtimeCaching: [
+          // Online results: the encrypted summary PokerEdge publishes to this
+          // repo's `data` branch. Same reasoning as Playground's file: newest
+          // copy with signal, last copy without. Cross-origin, but GitHub's raw
+          // host sends CORS headers, so this is a real (not opaque) 200.
+          {
+            urlPattern: ({ url }) => url.href === 'https://raw.githubusercontent.com/Gigi404/PokerStats/data/online.enc.json',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'online-data',
+              networkTimeoutSeconds: 4,
+              cacheableResponse: { statuses: [200] },
+              expiration: { maxEntries: 1 },
+            },
+          },
           {
             urlPattern: ({ url }) => url.pathname.endsWith('/data/playground.json'),
             handler: 'NetworkFirst',
