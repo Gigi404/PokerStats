@@ -11,9 +11,9 @@ DO NOW
               | been seen; the first real one was started by hand.
 
 COMING NEXT
-🟡 review     | decided 10-06: tapping a tournament in Online opens a full review —
-              | stack graph, stats in that tournament, key hands with cards, leak
-              | counts. Built from PokerEdge (its brief has the plan); the app
+🟡 review     | decided 10-06: a "Recent" view in Online — the last 3 days played,
+              | each with that day's stats, and each tournament opening a full
+              | review: stack graph, stats, key hands with cards, leak counts. Built from PokerEdge (its brief has the plan); the app
               | side is a new screen plus summary schema v2.
 
 NEEDS YOUR CALL
