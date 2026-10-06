@@ -144,6 +144,17 @@ is in PokerEdge's CLAUDE.md, session log 2026-10-05.
 - Gotcha: under Git Bash, `VITE_ONLINE_URL=/PokerStats/…` was rewritten to
   `C:/Program Files/Git/PokerStats/…`. Use `MSYS_NO_PATHCONV=1`.
 
+### 2026-10-06 — Recent view and tournament review (v0.4.0)
+`src/screens/OnlineReview.jsx`: Recent (the last 3 days played as cards, each
+with a stats strip and an expandable "How we played" list of checks) and a
+full-screen Review per tournament (result, stack graph, checks, key hands with
+card chips). Online opens on Recent when the file has `recent_days`, else on
+Overview. "Tournaments" renamed History; a recent tournament's sheet gets "Open
+full review". A tournament started after midnight shows its weekday ("Sun
+01:31"). The app judges nothing itself: verdicts, ranges and spreads come in the
+file. Checked at a true 390px viewport (headless Chrome over the DevTools
+protocol); not on a real iPhone. Schema stays 1: the new field is additive.
+
 ## Rejected approaches
 - Beast backend (Flask + SQLite): her iPhone would need Tailscale, plus the
   Doze-style tunnel drops seen on the Pixel. Revisit only as optional sync.

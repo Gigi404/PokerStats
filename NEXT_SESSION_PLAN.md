@@ -2,10 +2,11 @@
 
 <!-- BRIEF:START -->
 DO NOW
-🟡 phones     | put v0.3.0 on both phones: open with signal, swipe closed, reopen
-              | (Backup tab footer says v0.3.0), tap Online, type the passphrase
-              | once. Never yet tried on a real iPhone — check the three views
-              | fit at phone width and that a tournament's detail sheet opens.
+🟡 phones     | put v0.4.0 on both phones: open with signal, swipe closed, reopen
+              | (Backup footer says v0.4.0). Online now opens on Recent — the last
+              | 3 days played, "How we played" per day, tap a tournament for its
+              | full review. Passphrase once per phone if not done yet. Never yet
+              | seen on a real iPhone: check it fits and the review scrolls.
 🟡 after play | after the next real PokerStars session, open Online and confirm the
               | numbers moved by themselves. Only a "nothing changed" publish has
               | been seen; the first real one was started by hand.
