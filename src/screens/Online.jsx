@@ -415,6 +415,23 @@ const BAND_WORD = { low: 'low', high: 'high', ok: 'ok' }
 
 function MyGame({ data }) {
   const { play, benchmarks } = data
+  // Summaries since 2026-10-08 split tournament stats by table size: the
+  // typical ranges describe full tables, so only those are judged, and
+  // short-handed play (naturally looser) is shown beside them without a
+  // verdict. Older summaries have one combined column.
+  const split = play.tournament_full !== undefined
+  const fullMin = play.full_table_min ?? 7
+  const cols = split
+    ? [
+        { head: 'Full', sub: `${fullMin}+ players`, stats: play.tournament_full, ranges: benchmarks.tournament },
+        { head: 'Short', sub: `2–${fullMin - 1}`, stats: play.tournament_short, ranges: null },
+        { head: 'Cash', sub: '', stats: play.cash, ranges: benchmarks.cash },
+      ]
+    : [
+        { head: 'Tourn.', sub: '', stats: play.tournament, ranges: benchmarks.tournament },
+        { head: 'Cash', sub: '', stats: play.cash, ranges: benchmarks.cash },
+      ]
+  const colWidth = split ? 'w-[4.5rem]' : 'w-24'
   return (
     <>
       <div className="card p-3.5">
@@ -422,14 +439,17 @@ function MyGame({ data }) {
         <table className="num w-full table-fixed text-sm">
           <colgroup>
             <col />
-            <col className="w-24" />
-            <col className="w-24" />
+            {cols.map((c) => <col key={c.head} className={colWidth} />)}
           </colgroup>
           <thead>
             <tr className="text-left text-xs text-faint">
               <th className="pb-1.5 font-medium" />
-              <th className="pb-1.5 text-right font-medium">Tourn.</th>
-              <th className="pb-1.5 text-right font-medium">Cash</th>
+              {cols.map((c) => (
+                <th key={c.head} className="pb-1.5 text-right font-medium">
+                  <div>{c.head}</div>
+                  {c.sub && <div className="text-[10px] font-normal">{c.sub}</div>}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -439,8 +459,9 @@ function MyGame({ data }) {
                   <div>{label}</div>
                   <div className="text-[11px] text-faint">{hint}</div>
                 </td>
-                <StatCell value={play.tournament[k]} range={benchmarks.tournament[k]} />
-                <StatCell value={play.cash[k]} range={benchmarks.cash[k]} />
+                {cols.map((c) => (
+                  <StatCell key={c.head} value={c.stats?.[k] ?? null} range={c.ranges?.[k]} />
+                ))}
               </tr>
             ))}
             <tr>
@@ -448,12 +469,21 @@ function MyGame({ data }) {
                 <div>Win rate</div>
                 <div className="text-[11px] text-faint">bb per 100 hands (tournaments in chips)</div>
               </td>
-              <td className={`py-2 text-right ${play.tournament.bb_per_100 >= 0 ? 'text-gain' : 'text-loss'}`}>{signed(play.tournament.bb_per_100)}</td>
-              <td className={`py-2 text-right ${play.cash.bb_per_100 >= 0 ? 'text-gain' : 'text-loss'}`}>{signed(play.cash.bb_per_100)}</td>
+              {cols.map((c) => {
+                const v = c.stats?.bb_per_100 ?? null
+                return (
+                  <td key={c.head} className={`py-2 text-right ${v === null ? '' : v >= 0 ? 'text-gain' : 'text-loss'}`}>
+                    {v === null ? '—' : signed(v)}
+                  </td>
+                )
+              })}
             </tr>
           </tbody>
         </table>
-        <p className="mt-2 text-[11px] text-faint">Typical ranges are rough guides for small stakes. Outside the range is worth a look, not proof of a mistake.</p>
+        <p className="mt-2 text-[11px] text-faint">
+          Typical ranges are rough guides for small stakes. Outside the range is worth a look, not proof of a mistake.
+          {split && ' They describe full tables, so short-handed play is shown without a verdict — playing looser there is normal.'}
+        </p>
       </div>
 
       <OpenBySeat open={play.open_by_seat} ranges={benchmarks.open_by_seat} />
