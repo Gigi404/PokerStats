@@ -155,6 +155,15 @@ full review". A tournament started after midnight shows its weekday ("Sun
 file. Checked at a true 390px viewport (headless Chrome over the DevTools
 protocol); not on a real iPhone. Schema stays 1: the new field is additive.
 
+### 2026-10-08 — My game splits tournament stats by table size (v0.4.1)
+"Your stats vs typical" has Full (7+ players, judged against the ranges),
+Short (2–6, no verdict) and Cash columns, read from `play.tournament_full` /
+`tournament_short`; older summaries fall back to the single column. Checked at
+390px in headless Chrome against the real summary under a throwaway
+passphrase; not on a real phone. The version bump first rewrote package.json's
+line endings and a lockfile entry (a sed accident) — undone in `f40cfd9`.
+Next (PokerEdge Phase 7a step 7): decision grades in the review and on My game.
+
 ## Rejected approaches
 - Beast backend (Flask + SQLite): her iPhone would need Tailscale, plus the
   Doze-style tunnel drops seen on the Pixel. Revisit only as optional sync.

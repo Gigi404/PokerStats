@@ -2,8 +2,8 @@
 
 <!-- BRIEF:START -->
 DO NOW
-🟡 phones     | put v0.4.0 on both phones: open with signal, swipe closed, reopen
-              | (Backup footer says v0.4.0). Online now opens on Recent — the last
+🟡 phones     | put v0.4.1 on both phones: open with signal, swipe closed, reopen
+              | (Backup footer says v0.4.1; My game now has Full / Short / Cash). Online now opens on Recent — the last
               | 3 days played, "How we played" per day, tap a tournament for its
               | full review. Passphrase once per phone if not done yet. Never yet
               | seen on a real iPhone: check it fits and the review scrolls.
