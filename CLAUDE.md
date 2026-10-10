@@ -164,6 +164,19 @@ passphrase; not on a real phone. The version bump first rewrote package.json's
 line endings and a lockfile entry (a sed accident) — undone in `f40cfd9`.
 Next (PokerEdge Phase 7a step 7): decision grades in the review and on My game.
 
+### 2026-10-10 — Goal view: bankroll toward US$1,000 (v0.5.0)
+`src/screens/OnlineGoal.jsx`, a fifth Online button shown only when the file
+carries `bankroll`: estimated balance with the date it was last confirmed, a bar
+to US$1,000, the next withdrawal milestone with progress (gold when reached),
+"Play now" buy-ins and shots, CAD taken out, and the ladder ticked off. All
+numbers come from PokerEdge `core/bankroll.py`; the app computes nothing.
+Checked at 390px in headless Chrome against the real summary; not on a phone.
+The owner is installing the app on their own phone too: Online is shared
+(same file, passphrase once), live sessions stay on each phone.
+The version bump rewrote package.json's line endings again (sed); caught and
+redone byte-safe before the commit — **bump the version with a byte-level
+replace, never sed.**
+
 ## Rejected approaches
 - Beast backend (Flask + SQLite): her iPhone would need Tailscale, plus the
   Doze-style tunnel drops seen on the Pixel. Revisit only as optional sync.

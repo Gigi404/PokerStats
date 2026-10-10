@@ -2,20 +2,17 @@
 
 <!-- BRIEF:START -->
 DO NOW
-🟡 phones     | put v0.4.1 on both phones: open with signal, swipe closed, reopen
-              | (Backup footer says v0.4.1; My game now has Full / Short / Cash). Online now opens on Recent — the last
-              | 3 days played, "How we played" per day, tap a tournament for its
-              | full review. Passphrase once per phone if not done yet. Never yet
-              | seen on a real iPhone: check it fits and the review scrolls.
-🟡 after play | after the next real PokerStars session, open Online and confirm the
-              | numbers moved by themselves. Only a "nothing changed" publish has
-              | been seen; the first real one was started by hand.
+🟡 phones     | put v0.5.0 on both phones: open with signal, swipe closed, reopen
+              | (Backup footer says v0.5.0). New: Online → Goal, the bankroll on
+              | its way to US$1,000 and when to take money out. The owner is
+              | installing it on their own phone too — passphrase once there;
+              | live sessions stay separate per phone. Never seen on a real phone.
+🟡 after play | after the next PokerStars session, check Online moved by itself and
+              | Goal's estimate moved off US$116.
 
 COMING NEXT
-🟡 review     | decided 10-06: a "Recent" view in Online — the last 3 days played,
-              | each with that day's stats, and each tournament opening a full
-              | review: stack graph, stats, key hands with cards, leak counts. Built from PokerEdge (its brief has the plan); the app
-              | side is a new screen plus summary schema v2.
+🟡 grades     | PokerEdge Phase 7a step 7: decision grades on the review and My
+              | game. Mockups first; summary stays schema 1.
 
 NEEDS YOUR CALL
 🟡 next       | what she asks for once she uses it. Still open from 09-24:
@@ -31,6 +28,8 @@ CARRIED OVER — still open, still correct
 SETTLED
 ✅ hosting    | GitHub Pages, public repo (free plan — private would unpublish the
               | site). Her data never leaves her phone.
+✅ goal       | the Goal view only lays out PokerEdge's `bankroll` block; ladder and
+              | buy-in bands are decided there, not in the app.
 ✅ online     | PokerStars results arrive as an encrypted file on the `data` branch,
               | unlocked by a passphrase typed once per phone. Shown in US$, never
               | added to the CAD live results. Live sessions stay manual.
