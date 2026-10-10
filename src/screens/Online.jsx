@@ -15,6 +15,7 @@ import {
 } from '../lib/online.js'
 import { ageLabel } from '../lib/playground.js'
 import Goal from './OnlineGoal.jsx'
+import { ShortStack } from './OnlineGrades.jsx'
 import { Recent, Review } from './OnlineReview.jsx'
 import { formatDay } from '../lib/time.js'
 
@@ -517,6 +518,8 @@ function MyGame({ data }) {
         </table>
         <p className="mt-2 text-[11px] text-faint">Re-shove: 3-bet or all-in when someone raised first, outside the big blind.</p>
       </div>
+
+      <ShortStack s={play.short_stack} />
 
       <Trends trends={play.trends} ranges={benchmarks.open_by_seat} />
       <Tickets tickets={data.tournaments.tickets} />

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import Cards from '../components/Cards.jsx'
 import { Badge } from '../components/ui.jsx'
 import { FORMAT_LABELS, formatSignedUSD, formatUSD, outcomeLabel } from '../lib/online.js'
 import { formatDay } from '../lib/time.js'
+import { Decisions, GradeLine } from './OnlineGrades.jsx'
 
 /*
   The review half of the Online tab: the last few days played, day by day,
@@ -295,6 +297,8 @@ export function Review({ review, entry, onClose }) {
             <Checks checks={review.checks} />
           </div>
 
+          {review.decisions && <Decisions decisions={review.decisions} />}
+
           <div>
             <div className={`${title} px-1`}>Key hands</div>
             {review.key_hands.length === 0 ? (
@@ -308,8 +312,9 @@ export function Review({ review, entry, onClose }) {
             )}
           </div>
           <p className="px-1 text-[11px] text-faint">
-            Key hands show what happened, not whether it was right. Grading each decision comes with the equity
-            engine.
+            {review.decisions
+              ? 'Grades cover all-in decisions before the flop at 25bb or less, judged against what this player pool usually shoves and calls with. Other hands show what happened, not whether it was right.'
+              : 'Key hands show what happened, not whether it was right.'}
           </p>
         </div>
       </div>
@@ -405,34 +410,8 @@ function Hand({ h }) {
           <span className="num">Pot {h.pot_bb}bb</span>
         </div>
       )}
+
+      {h.grade && <GradeLine d={h.grade} />}
     </div>
-  )
-}
-
-const SUIT = { s: '♠', h: '♥', d: '♦', c: '♣' }
-
-/** "Jd Jh" → two little cards; hearts and diamonds in red. */
-function Cards({ cards, small = false }) {
-  const list = String(cards || '').split(/[\s,]+/).filter(Boolean)
-  if (!list.length) return <span className="text-faint">??</span>
-  return (
-    <span className="inline-flex gap-0.5">
-      {list.map((c, i) => {
-        const rank = c.slice(0, -1).replace('T', '10')
-        const suit = c.slice(-1).toLowerCase()
-        const red = suit === 'h' || suit === 'd'
-        return (
-          <span
-            key={c + i}
-            className={`num inline-flex items-center justify-center rounded border border-black/10 bg-[#f4f1e8] font-bold leading-none ${
-              small ? 'h-5 min-w-[1.25rem] px-0.5 text-[10px]' : 'h-7 min-w-[1.75rem] px-1 text-[13px]'
-            } ${red ? 'text-[#c0392b]' : 'text-[#111]'}`}
-          >
-            {rank}
-            {SUIT[suit] || suit}
-          </span>
-        )
-      })}
-    </span>
   )
 }
