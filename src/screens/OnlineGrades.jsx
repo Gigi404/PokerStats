@@ -198,6 +198,7 @@ const SPOT_ROWS = [
   ['reshove', 'Re-shove over a raise'],
   ['fourbet', '4-bet jam over a 3-bet'],
   ['call', 'Call a shove'],
+  ['steal', 'Steal, 15–25bb'],
 ]
 
 /** Columns of the mistakes-by-stack table. */
@@ -206,6 +207,7 @@ const STACK_COLS = [
   ['reshove', 'Re-shove'],
   ['fourbet', '4-bet'],
   ['call', 'Call'],
+  ['steal', 'Steal'],
 ]
 
 /** Seats with this few graded shove spots are left out of the seat bars. */
@@ -255,7 +257,10 @@ export function ShortStack({ s }) {
           ))}
         </tbody>
       </table>
-      <p className="mt-1 text-[11px] text-faint">Missed: folded when going all-in was worth more.</p>
+      <p className="mt-1 text-[11px] text-faint">
+        Missed: folded when going all-in was worth more.
+        {s.spots.steal && ' Steals list only folds that shoving beat, so their bb is a floor.'}
+      </p>
       {s.nash?.n > 0 && (
         <p className="mt-2 text-[12px] text-muted">
           Nash push/fold chart: you played it in{' '}
@@ -330,6 +335,15 @@ export function ShortStack({ s }) {
         <>
           <div className={`${title} mt-4`}>Costliest mistakes</div>
           {s.costliest.map((d) => (
+            <Row key={d.hand_id + d.spot} d={d} suffix={shortDate(d.date)} />
+          ))}
+        </>
+      )}
+
+      {s.costliest_steals?.length > 0 && (
+        <>
+          <div className={`${title} mt-4`}>Costliest missed steals · 15–25bb</div>
+          {s.costliest_steals.map((d) => (
             <Row key={d.hand_id + d.spot} d={d} suffix={shortDate(d.date)} />
           ))}
         </>

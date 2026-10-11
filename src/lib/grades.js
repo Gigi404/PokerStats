@@ -6,17 +6,21 @@
   This file only turns those into sentences: no poker rule lives here, the
   judgement was made on the beast.
 
-  A decision is one of four spots, each a choice between going all-in and
+  A decision is one of five spots, each a choice between going all-in and
   folding:
     shove    folded to you, ≤15bb
     reshove  one raise in front, ≤40bb (a 3-bet jam)
     fourbet  your open was 3-bet, ≤40bb (a 4-bet jam; calls are not graded)
     call     facing a shove, ≤25bb
+    steal    folded to you at 15–25bb and you folded: only listed when shoving
+             beat folding, so playing the hand (raise or shove) was worth at
+             least that much. Carried apart from `decisions` (review.steals,
+             short_stack.costliest_steals) so older apps never meet it.
   `ev_bb` is what the all-in option (shove or call) is worth against folding.
 */
 
-const ALL_IN = { shove: 'shove', reshove: 're-shove', fourbet: '4-bet jam', call: 'call' }
-const GERUND = { shove: 'Shoving', reshove: 'Re-shoving', fourbet: '4-bet jamming', call: 'Calling' }
+const ALL_IN = { shove: 'shove', reshove: 're-shove', fourbet: '4-bet jam', call: 'call', steal: 'shove' }
+const GERUND = { shove: 'Shoving', reshove: 'Re-shoving', fourbet: '4-bet jamming', call: 'Calling', steal: 'Shoving' }
 
 /** Signed big blinds, one decimal, with a real minus sign. */
 export function bb(v) {
@@ -30,6 +34,7 @@ export function bb(v) {
 export function situation(d) {
   const folded = d.action === 'fold'
   if (d.spot === 'shove') return folded ? 'folded, first in' : 'shoved, first in'
+  if (d.spot === 'steal') return 'folded, first in'
   if (d.spot === 'reshove') return folded ? 'folded to a raise' : 're-shoved over a raise'
   if (d.spot === 'fourbet') return folded ? 'folded to a 3-bet' : '4-bet jammed'
   return folded ? 'folded to a shove' : 'called a shove'
@@ -44,6 +49,10 @@ export function situation(d) {
 export function verdictLine(d) {
   const alt = ALL_IN[d.spot]
   const acted = d.action !== 'fold'
+  if (d.spot === 'steal') {
+    // Always a mistake (nothing else is published); the cost is a floor.
+    return { mark: '❌', text: 'Folded — play it: raise or shove', value: `≥${bb(-d.cost_bb)}`, tone: 'loss' }
+  }
   const did = acted ? alt : 'fold'
   if (d.verdict === 'close') {
     return { mark: '≈', text: `Close — ${alt} or fold, about the same`, value: bb(d.ev_bb), tone: 'muted' }
@@ -79,7 +88,9 @@ export function whyLines(d) {
   if (w.bounty_bb > 0) lines.push(`Their bounty is worth ${fmt(w.bounty_bb)}bb to you, counted.`)
 
   const gerund = GERUND[d.spot]
-  const conclusion = d.ev_bb >= 0
+  const conclusion = d.spot === 'steal'
+    ? `Shoving alone earns ${fmt(Math.abs(d.ev_bb))}bb more than folding, so playing this hand is worth at least that. A raise may be better still — that part is not graded.`
+    : d.ev_bb >= 0
     ? `${gerund} earns ${fmt(Math.abs(d.ev_bb))}bb more than folding.`
     : `Folding earns ${fmt(Math.abs(d.ev_bb))}bb more than ${gerund.toLowerCase()}.`
 
@@ -133,6 +144,15 @@ const FLAG_TEXT = {
 export function listDecisions(decisions, mode) {
   if (mode === 'order') return decisions
   return decisions.filter((d) => d.verdict === 'mistake').sort((a, b) => b.cost_bb - a.cost_bb)
+}
+
+/**
+ * A review's graded decisions with its missed steals merged in, in the
+ * order played. Files from before steals have no `steals`.
+ */
+export function withSteals(review) {
+  const all = [...(review.decisions || []), ...(review.steals || [])]
+  return all.sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`))
 }
 
 /** Counts and bb given up for one tournament's decisions. */

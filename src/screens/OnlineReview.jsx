@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import Cards from '../components/Cards.jsx'
 import { Badge } from '../components/ui.jsx'
 import { FORMAT_LABELS, formatSignedUSD, formatUSD, outcomeLabel } from '../lib/online.js'
+import { withSteals } from '../lib/grades.js'
 import { formatDay } from '../lib/time.js'
 import { Decisions, GradeLine } from './OnlineGrades.jsx'
 
@@ -297,7 +298,7 @@ export function Review({ review, entry, onClose }) {
             <Checks checks={review.checks} />
           </div>
 
-          {review.decisions && <Decisions decisions={review.decisions} />}
+          {review.decisions && <Decisions decisions={withSteals(review)} />}
 
           <div>
             <div className={`${title} px-1`}>Key hands</div>
@@ -313,7 +314,7 @@ export function Review({ review, entry, onClose }) {
           </div>
           <p className="px-1 text-[11px] text-faint">
             {review.decisions
-              ? 'Grades cover all-in decisions before the flop — shoves and calls at 25bb or less, 3-bet jams up to 40bb — judged against what this player pool usually shoves and calls with. Other hands show what happened, not whether it was right.'
+              ? 'Grades cover all-in decisions before the flop — shoves and calls at 25bb or less, 3-bet jams up to 40bb, folds at 15–25bb that shoving beat — judged against what this player pool usually shoves and calls with. Other hands show what happened, not whether it was right.'
               : 'Key hands show what happened, not whether it was right.'}
           </p>
         </div>

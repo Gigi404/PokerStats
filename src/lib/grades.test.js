@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bb, listDecisions, nashLine, situation, tally, verdictLine, whyLines } from './grades.js'
+import { bb, listDecisions, nashLine, situation, tally, verdictLine, whyLines, withSteals } from './grades.js'
 
 // Shaped exactly as PokerEdge's core/short_stack.compact writes them; the
 // numbers are two real decisions from 2026-10-08.
@@ -80,6 +80,19 @@ describe('lists and tallies', () => {
     expect(situation(fb)).toBe('folded to a 3-bet')
     expect(situation({ ...fb, action: 'shove' })).toBe('4-bet jammed')
     expect(verdictLine(fb).text).toBe('Folded — 4-bet jamming was better')
+  })
+  it('steal wording: a floor, never a verdict on raising', () => {
+    const st = { ...missedShove, spot: 'steal', better: 'play', stack_bb: 19.5, ev_bb: 1.7, cost_bb: 1.7 }
+    expect(situation(st)).toBe('folded, first in')
+    expect(verdictLine(st)).toEqual({ mark: '❌', text: 'Folded — play it: raise or shove', value: '≥−1.7bb', tone: 'loss' })
+    expect(whyLines(st).conclusion).toMatch(/^Shoving alone earns 1.7bb more than folding/)
+  })
+  it('steals merge into a review in the order played', () => {
+    const a = { hand_id: 'a', date: '2026-10-09', time: '21:05' }
+    const b = { hand_id: 'b', date: '2026-10-09', time: '21:40' }
+    const c = { hand_id: 'c', date: '2026-10-09', time: '21:20' }
+    expect(withSteals({ decisions: [a, b], steals: [c] }).map((d) => d.hand_id)).toEqual(['a', 'c', 'b'])
+    expect(withSteals({ decisions: [a] })).toEqual([a])
   })
   it('situations and bb', () => {
     expect(situation(missedShove)).toBe('folded, first in')
