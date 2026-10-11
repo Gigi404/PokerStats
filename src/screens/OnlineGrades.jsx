@@ -223,6 +223,13 @@ export function ShortStack({ s }) {
         </tbody>
       </table>
       <p className="mt-1 text-[11px] text-faint">Missed: folded when going all-in was worth more.</p>
+      {s.nash?.n > 0 && (
+        <p className="mt-2 text-[12px] text-muted">
+          Nash push/fold chart: you played it in{' '}
+          <span className="num text-ink">{s.nash.you_match}</span> of {s.nash.n} push/fold spots. Against this
+          pool the best play differs from the chart in {s.nash.pool_differs}.
+        </p>
+      )}
 
       {seats.length > 0 && (
         <>

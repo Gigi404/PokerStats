@@ -14,6 +14,7 @@ import {
   tournamentCurve,
 } from '../lib/online.js'
 import { ageLabel } from '../lib/playground.js'
+import Charts from './OnlineCharts.jsx'
 import Goal from './OnlineGoal.jsx'
 import { ShortStack } from './OnlineGrades.jsx'
 import { Recent, Review } from './OnlineReview.jsx'
@@ -72,6 +73,7 @@ export default function Online() {
           { value: 'game', label: 'My game' },
           // Files published before the bankroll existed have no `bankroll` key.
           ...('bankroll' in data ? [{ value: 'goal', label: 'Goal' }] : []),
+          { value: 'charts', label: 'Charts' },
         ]}
       />
 
@@ -79,6 +81,8 @@ export default function Online() {
         <Recent days={data.recent_days} history={data.tournaments.history} />
       ) : current === 'overview' ? (
         <Overview data={data} />
+      ) : current === 'charts' ? (
+        <Charts />
       ) : current === 'goal' ? (
         <Goal bankroll={data.bankroll} />
       ) : current === 'tournaments' ? (

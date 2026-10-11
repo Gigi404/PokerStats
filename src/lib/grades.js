@@ -81,10 +81,29 @@ export function whyLines(d) {
     ? `${gerund} earns ${fmt(Math.abs(d.ev_bb))}bb more than folding.`
     : `Folding earns ${fmt(Math.abs(d.ev_bb))}bb more than ${gerund.toLowerCase()}.`
 
+  const nash = nashLine(d)
+  if (nash) lines.push(nash)
+
   const notes = []
   if (w.sample) notes.push(`Based on ${w.sample.toLocaleString('en-CA')} similar spots in this player pool.`)
   for (const f of d.flags || []) if (FLAG_TEXT[f]) notes.push(FLAG_TEXT[f])
   return { lines, conclusion, notes }
+}
+
+/**
+ * The push/fold Nash chart's play, as a second opinion — and, when it
+ * differs from the best play against this pool, that this is the pool's
+ * habit being exploited. Null outside pure push/fold spots (and in files
+ * published before the charts existed).
+ */
+export function nashLine(d) {
+  if (!d.nash) return null
+  const chart = d.nash
+  const best = d.ev_bb >= 0 ? ALL_IN[d.spot] : 'fold'
+  if (d.verdict === 'close' || (chart === 'fold') === (best === 'fold')) {
+    return `The Nash push/fold chart says ${chart} too.`
+  }
+  return `The Nash push/fold chart says ${chart}; against how this pool plays, ${best} earns more.`
 }
 
 const FLAG_TEXT = {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bb, listDecisions, situation, tally, verdictLine, whyLines } from './grades.js'
+import { bb, listDecisions, nashLine, situation, tally, verdictLine, whyLines } from './grades.js'
 
 // Shaped exactly as PokerEdge's core/short_stack.compact writes them; the
 // numbers are two real decisions from 2026-10-08.
@@ -74,5 +74,18 @@ describe('lists and tallies', () => {
     expect(situation(missedShove)).toBe('folded, first in')
     expect(situation(goodCall)).toBe('called a shove')
     expect(bb(0)).toBe('±0bb')
+  })
+})
+
+describe('nash line', () => {
+  it('absent in files without charts', () => {
+    expect(nashLine(missedShove)).toBeNull()
+  })
+  it('agrees with the best play', () => {
+    expect(nashLine({ ...missedShove, nash: 'shove' })).toBe('The Nash push/fold chart says shove too.')
+  })
+  it('says when the pool is being exploited', () => {
+    expect(nashLine({ ...missedShove, nash: 'fold' })).toBe(
+      'The Nash push/fold chart says fold; against how this pool plays, shove earns more.')
   })
 })
