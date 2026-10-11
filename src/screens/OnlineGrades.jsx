@@ -196,7 +196,16 @@ function summaryLine(t) {
 const SPOT_ROWS = [
   ['shove', 'Shove, folded to you'],
   ['reshove', 'Re-shove over a raise'],
+  ['fourbet', '4-bet jam over a 3-bet'],
   ['call', 'Call a shove'],
+]
+
+/** Columns of the mistakes-by-stack table. */
+const STACK_COLS = [
+  ['shove', 'Shove'],
+  ['reshove', 'Re-shove'],
+  ['fourbet', '4-bet'],
+  ['call', 'Call'],
 ]
 
 /** Seats with this few graded shove spots are left out of the seat bars. */
@@ -235,7 +244,8 @@ export function ShortStack({ s }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-white/5">
-          {SPOT_ROWS.map(([k, label]) => (
+          {/* Files published before 4-bet grading have no fourbet row. */}
+          {SPOT_ROWS.filter(([k]) => s.spots[k]).map(([k, label]) => (
             <tr key={k}>
               <td className="py-2">{label}</td>
               <td className="py-2 text-right text-muted">{s.spots[k].graded}</td>
@@ -293,16 +303,18 @@ export function ShortStack({ s }) {
         <thead>
           <tr className="text-xs text-faint">
             <th className="pb-1.5 text-left font-medium">Stack</th>
-            <th className="pb-1.5 text-right font-medium">Shove</th>
-            <th className="pb-1.5 text-right font-medium">Re-shove</th>
-            <th className="pb-1.5 text-right font-medium">Call</th>
+            {STACK_COLS.map(([k, label]) => (
+              <th key={k} className="pb-1.5 text-right font-medium">
+                {label}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody className="divide-y divide-white/5">
           {s.by_stack.map((r) => (
             <tr key={r.key}>
               <td className="py-2">{r.label}</td>
-              {['shove', 'reshove', 'call'].map((k) => (
+              {STACK_COLS.map(([k]) => (
                 <td key={k} className={`py-2 text-right ${r[k] ? 'text-loss' : 'text-faint'}`}>
                   {r[k] || '—'}
                 </td>
@@ -311,6 +323,8 @@ export function ShortStack({ s }) {
           ))}
         </tbody>
       </table>
+
+      <FacingThreeBet f={s.facing_3bet} />
 
       {s.costliest.length > 0 && (
         <>
@@ -326,6 +340,55 @@ export function ShortStack({ s }) {
         usually shoves and calls with, not exact. Bubbles and satellite pay jumps are not modelled yet.
       </p>
     </div>
+  )
+}
+
+/**
+ * How you answer a 3-bet of your own open, by stack: counted, never judged
+ * (a call leads to a flop nothing here can price). 4-bet jams and folds at
+ * 40bb or less are graded in the table above.
+ *
+ * @param {{f: object}} props  short_stack.facing_3bet (absent in older files)
+ */
+function FacingThreeBet({ f }) {
+  if (!f || !f.n) return null
+  const rows = f.rows.filter((r) => r.n > 0)
+  return (
+    <>
+      <div className={`${title} mt-4`}>When your open is 3-bet</div>
+      <p className="text-sm text-muted">
+        You fold <span className="num font-semibold text-ink">{f.fold_pct}%</span> of the time ({f.n} times).
+      </p>
+      <table className="num mt-1 w-full text-sm">
+        <thead>
+          <tr className="text-xs text-faint">
+            <th className="pb-1.5 text-left font-medium">Stack · 3-bet</th>
+            <th className="pb-1.5 text-right font-medium">Times</th>
+            <th className="pb-1.5 text-right font-medium">Fold</th>
+            <th className="pb-1.5 text-right font-medium">Call</th>
+            <th className="pb-1.5 text-right font-medium">4-bet</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/5">
+          {rows.map((r) => (
+            <tr key={r.key + r.jam}>
+              <td className="py-2">
+                {r.label} <span className="text-faint">· {r.jam ? 'all-in' : 'raise'}</span>
+              </td>
+              <td className="py-2 text-right text-muted">{r.n}</td>
+              {['fold', 'call', '4bet'].map((k) => (
+                <td key={k} className="py-2 text-right">
+                  {r[k] || <span className="text-faint">—</span>}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="mt-1 text-[11px] text-faint">
+        Counted, not graded: a call goes to a flop, which nothing here can price yet.
+      </p>
+    </>
   )
 }
 

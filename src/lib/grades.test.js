@@ -75,6 +75,12 @@ describe('lists and tallies', () => {
     const t = tally(tagged)
     expect([t.chart, t.pool]).toEqual([1, 1])
   })
+  it('4-bet spot wording', () => {
+    const fb = { ...missedShove, spot: 'fourbet' }
+    expect(situation(fb)).toBe('folded to a 3-bet')
+    expect(situation({ ...fb, action: 'shove' })).toBe('4-bet jammed')
+    expect(verdictLine(fb).text).toBe('Folded — 4-bet jamming was better')
+  })
   it('situations and bb', () => {
     expect(situation(missedShove)).toBe('folded, first in')
     expect(situation(goodCall)).toBe('called a shove')

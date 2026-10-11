@@ -6,16 +6,17 @@
   This file only turns those into sentences: no poker rule lives here, the
   judgement was made on the beast.
 
-  A decision is one of three spots, each a choice between going all-in and
+  A decision is one of four spots, each a choice between going all-in and
   folding:
     shove    folded to you, ≤15bb
     reshove  one raise in front, ≤40bb (a 3-bet jam)
+    fourbet  your open was 3-bet, ≤40bb (a 4-bet jam; calls are not graded)
     call     facing a shove, ≤25bb
   `ev_bb` is what the all-in option (shove or call) is worth against folding.
 */
 
-const ALL_IN = { shove: 'shove', reshove: 're-shove', call: 'call' }
-const GERUND = { shove: 'Shoving', reshove: 'Re-shoving', call: 'Calling' }
+const ALL_IN = { shove: 'shove', reshove: 're-shove', fourbet: '4-bet jam', call: 'call' }
+const GERUND = { shove: 'Shoving', reshove: 'Re-shoving', fourbet: '4-bet jamming', call: 'Calling' }
 
 /** Signed big blinds, one decimal, with a real minus sign. */
 export function bb(v) {
@@ -30,6 +31,7 @@ export function situation(d) {
   const folded = d.action === 'fold'
   if (d.spot === 'shove') return folded ? 'folded, first in' : 'shoved, first in'
   if (d.spot === 'reshove') return folded ? 'folded to a raise' : 're-shoved over a raise'
+  if (d.spot === 'fourbet') return folded ? 'folded to a 3-bet' : '4-bet jammed'
   return folded ? 'folded to a shove' : 'called a shove'
 }
 
@@ -121,6 +123,7 @@ const FLAG_TEXT = {
   satellite: 'Satellite: a seat pays everyone the same, so surviving is worth more than chips say.',
   bounty_unknown: 'Bounty not counted: the starting stack is unknown.',
   others_behind: 'Players still to act are assumed to fold.',
+  threebet_thin: 'Few 3-bettors have faced a 4-bet jam here, so this grade is rougher than most.',
 }
 
 /**
