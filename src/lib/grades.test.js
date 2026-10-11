@@ -68,7 +68,12 @@ describe('lists and tallies', () => {
     expect(listDecisions(all, 'order')).toBe(all)
   })
   it('tally', () => {
-    expect(tally(all)).toEqual({ n: 4, correct: 1, close: 1, mistake: 2, folds: 1, cost: 3 })
+    expect(tally(all)).toEqual({ n: 4, correct: 1, close: 1, mistake: 2, folds: 1, cost: 3, chart: 0, pool: 0 })
+  })
+  it('tally counts chart and pool mistakes', () => {
+    const tagged = [{ ...missedShove, nash: 'fold', nash_kind: 'pool' }, { ...badShove, nash: 'fold', nash_kind: 'chart' }, goodCall]
+    const t = tally(tagged)
+    expect([t.chart, t.pool]).toEqual([1, 1])
   })
   it('situations and bb', () => {
     expect(situation(missedShove)).toBe('folded, first in')

@@ -106,6 +106,17 @@ export function nashLine(d) {
   return `The Nash push/fold chart says ${chart}; against how this pool plays, ${best} earns more.`
 }
 
+/**
+ * The chart/pool tag on a mistake (PokerEdge decides it: `nash_kind`).
+ *   chart  the push/fold chart plays it too — a mistake against anyone.
+ *   pool   the chart plays it the other way; the better play paid only
+ *          against how this pool plays. An exploit missed.
+ */
+export const KIND_TEXT = {
+  chart: 'chart: the push/fold chart plays it too — learn it',
+  pool: 'pool: the chart disagrees — it paid only against how this pool plays',
+}
+
 const FLAG_TEXT = {
   satellite: 'Satellite: a seat pays everyone the same, so surviving is worth more than chips say.',
   bounty_unknown: 'Bounty not counted: the starting stack is unknown.',
@@ -123,12 +134,13 @@ export function listDecisions(decisions, mode) {
 
 /** Counts and bb given up for one tournament's decisions. */
 export function tally(decisions) {
-  const t = { n: decisions.length, correct: 0, close: 0, mistake: 0, folds: 0, cost: 0 }
+  const t = { n: decisions.length, correct: 0, close: 0, mistake: 0, folds: 0, cost: 0, chart: 0, pool: 0 }
   for (const d of decisions) {
     t[d.verdict] += 1
     if (d.verdict === 'mistake') {
       t.cost += d.cost_bb
       if (d.action === 'fold') t.folds += 1
+      if (d.nash_kind) t[d.nash_kind] += 1
     }
   }
   t.cost = Math.round(t.cost * 10) / 10

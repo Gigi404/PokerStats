@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Cards from '../components/Cards.jsx'
-import { Segmented } from '../components/ui.jsx'
-import { listDecisions, situation, tally, verdictLine, whyLines } from '../lib/grades.js'
+import { Badge, Segmented } from '../components/ui.jsx'
+import { KIND_TEXT, listDecisions, situation, tally, verdictLine, whyLines } from '../lib/grades.js'
 
 /*
   Short-stack grades from PokerEdge's equity engine (core/short_stack.py):
@@ -58,7 +58,8 @@ export function GradeLine({ d }) {
         <span className={TONE[v.tone]}>
           {v.mark} {v.text}
         </span>
-        <span className={`num shrink-0 ${TONE[v.tone]}`}>
+        <span className={`num flex shrink-0 items-center gap-1.5 ${TONE[v.tone]}`}>
+          <KindTag d={d} />
           {v.value} <span className="text-faint">{open ? '▴' : '▾'}</span>
         </span>
       </button>
@@ -87,10 +88,31 @@ function Row({ d, showMark, suffix }) {
             {suffix && ` · ${suffix}`}
           </span>
         </span>
-        <span className={`num shrink-0 ${TONE[v.tone]}`}>{v.value}</span>
+        <span className={`num flex shrink-0 items-center gap-1.5 ${TONE[v.tone]}`}>
+          <KindTag d={d} />
+          {v.value}
+        </span>
       </button>
       {open && <Why d={d} />}
     </div>
+  )
+}
+
+/**
+ * "chart" or "pool" on a charted mistake: is it wrong by the push/fold chart
+ * too, or only against this pool? Nothing on other decisions.
+ */
+function KindTag({ d }) {
+  if (!d.nash_kind) return null
+  return <Badge tone={d.nash_kind === 'chart' ? 'accent' : 'plain'}>{d.nash_kind}</Badge>
+}
+
+/** The one-line key under a list that shows chart/pool tags. */
+function KindKey() {
+  return (
+    <p className="mt-1 text-[11px] text-faint">
+      {KIND_TEXT.chart}. {KIND_TEXT.pool}.
+    </p>
   )
 }
 
@@ -142,6 +164,7 @@ export function Decisions({ decisions }) {
           shown.map((d) => <Row key={d.hand_id + d.spot} d={d} showMark={mode === 'order'} />)
         )}
       </div>
+      {t.chart + t.pool > 0 && <KindKey />}
       {mode === 'mistakes' && (
         <div className="mt-1 flex flex-wrap gap-2">
           {list.length > MISTAKES_SHOWN && (
@@ -229,6 +252,21 @@ export function ShortStack({ s }) {
           <span className="num text-ink">{s.nash.you_match}</span> of {s.nash.n} push/fold spots. Against this
           pool the best play differs from the chart in {s.nash.pool_differs}.
         </p>
+      )}
+      {s.nash?.mistakes && s.nash.mistakes.chart.n + s.nash.mistakes.pool.n > 0 && (
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          {['chart', 'pool'].map((k) => (
+            <div key={k} className="rounded-xl bg-surface-2 p-2.5">
+              <Badge tone={k === 'chart' ? 'accent' : 'plain'}>{k}</Badge>
+              <div className="num mt-1 text-lg font-bold">
+                {s.nash.mistakes[k].n} <span className="text-sm text-loss">−{Math.round(s.nash.mistakes[k].cost_bb)}bb</span>
+              </div>
+              <div className="text-[11px] text-faint">
+                {k === 'chart' ? 'wrong by the chart too — learn these' : 'the chart disagrees — paid only vs this pool'}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
       {seats.length > 0 && (
