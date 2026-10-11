@@ -17,6 +17,7 @@ import { ageLabel } from '../lib/playground.js'
 import Charts from './OnlineCharts.jsx'
 import Goal from './OnlineGoal.jsx'
 import DeepThreeBet from './OnlineDeep.jsx'
+import OpenRanges from './OnlineOpens.jsx'
 import { ShortStack } from './OnlineGrades.jsx'
 import { Recent, Review } from './OnlineReview.jsx'
 import { formatDay } from '../lib/time.js'
@@ -498,6 +499,7 @@ function MyGame({ data }) {
       </div>
 
       <OpenBySeat open={play.open_by_seat} ranges={benchmarks.open_by_seat} />
+      <OpenRanges o={play.open_ranges} />
 
       <div className="card p-3.5">
         <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">By stack size · tournaments</div>
