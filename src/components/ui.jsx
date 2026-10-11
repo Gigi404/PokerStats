@@ -23,7 +23,9 @@ export function Segmented({ options, value, onChange, size = 'md' }) {
             aria-checked={selected}
             onClick={() => onChange(o.value)}
             className={`flex-1 rounded-xl font-semibold transition-colors ${
-              size === 'sm' ? 'py-1.5 text-sm' : 'py-2.5 text-[15px]'
+              // Small bars carry up to six tabs (Online); nowrap keeps "My game"
+              // on one line — flex-1's min-width then grows the longer labels.
+              size === 'sm' ? 'whitespace-nowrap px-1.5 py-1.5 text-sm' : 'py-2.5 text-[15px]'
             } ${selected ? 'btn-gold' : 'text-muted active:bg-line'}`}
           >
             {o.label}
