@@ -9,7 +9,7 @@
   A decision is one of three spots, each a choice between going all-in and
   folding:
     shove    folded to you, ≤15bb
-    reshove  one raise in front, ≤20bb
+    reshove  one raise in front, ≤40bb (a 3-bet jam)
     call     facing a shove, ≤25bb
   `ev_bb` is what the all-in option (shove or call) is worth against folding.
 */

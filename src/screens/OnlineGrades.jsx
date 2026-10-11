@@ -5,8 +5,8 @@ import { KIND_TEXT, listDecisions, situation, tally, verdictLine, whyLines } fro
 
 /*
   Short-stack grades from PokerEdge's equity engine (core/short_stack.py):
-  every preflop all-in decision at 25bb or less — shove, re-shove or call vs
-  fold — judged in chips against what this player pool usually shoves and
+  every preflop all-in decision up to 40bb (open shoves and calls to 25bb,
+  3-bet jams to 40bb) — shove, re-shove or call vs fold — judged in chips against what this player pool usually shoves and
   calls with. Three places show them:
 
     GradeLine   under a key hand that was graded (tap for why)
@@ -212,7 +212,7 @@ export function ShortStack({ s }) {
   const seats = s.by_seat.filter((r) => r.graded >= MIN_SEAT_SPOTS)
   return (
     <div className="card p-3.5">
-      <div className={title}>Short-stack decisions · 25bb or less</div>
+      <div className={title}>Short-stack decisions · 40bb or less</div>
       <div className="flex items-start justify-between gap-3">
         <div>
           <span className="num text-2xl font-bold">{s.acted.correct}</span>

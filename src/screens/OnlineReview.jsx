@@ -313,7 +313,7 @@ export function Review({ review, entry, onClose }) {
           </div>
           <p className="px-1 text-[11px] text-faint">
             {review.decisions
-              ? 'Grades cover all-in decisions before the flop at 25bb or less, judged against what this player pool usually shoves and calls with. Other hands show what happened, not whether it was right.'
+              ? 'Grades cover all-in decisions before the flop — shoves and calls at 25bb or less, 3-bet jams up to 40bb — judged against what this player pool usually shoves and calls with. Other hands show what happened, not whether it was right.'
               : 'Key hands show what happened, not whether it was right.'}
           </p>
         </div>
