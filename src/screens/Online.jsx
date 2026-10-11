@@ -16,6 +16,7 @@ import {
 import { ageLabel } from '../lib/playground.js'
 import Charts from './OnlineCharts.jsx'
 import Goal from './OnlineGoal.jsx'
+import DeepThreeBet from './OnlineDeep.jsx'
 import { ShortStack } from './OnlineGrades.jsx'
 import { Recent, Review } from './OnlineReview.jsx'
 import { formatDay } from '../lib/time.js'
@@ -524,6 +525,7 @@ function MyGame({ data }) {
       </div>
 
       <ShortStack s={play.short_stack} />
+      <DeepThreeBet d={play.deep_threebet} />
 
       <Trends trends={play.trends} ranges={benchmarks.open_by_seat} />
       <Tickets tickets={data.tournaments.tickets} />
