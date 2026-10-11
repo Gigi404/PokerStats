@@ -123,6 +123,7 @@ export const FORMAT_LABELS = {
   zoom_pko: 'Zoom PKO',
   zoom: 'Zoom',
   freezeout: 'Freezeout',
+  mystery: 'Mystery bounty',
   unknown: 'Other',
 }
 
