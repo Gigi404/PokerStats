@@ -1,4 +1,4 @@
-import { band, formatPct } from '../lib/online.js'
+import { BAND_ARROW, band, formatPct } from '../lib/online.js'
 
 /*
   Opening by seat and stack, from PokerEdge's analysis/open_ranges.py.
@@ -69,6 +69,7 @@ function Cell({ c }) {
   return (
     <td className="py-2 text-right align-top">
       <div className={b ? TONE[b] : enough ? '' : 'text-faint'}>
+        {b && BAND_ARROW[b]}
         {formatPct(c.hero.pct)}
         <span className="text-[10px] text-faint"> ·{c.hero.n}</span>
       </div>

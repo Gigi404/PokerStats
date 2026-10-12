@@ -17,6 +17,7 @@ import { ageLabel } from '../lib/playground.js'
 import Charts from './OnlineCharts.jsx'
 import Goal from './OnlineGoal.jsx'
 import DeepThreeBet from './OnlineDeep.jsx'
+import FlopHabits from './OnlineFlop.jsx'
 import OpenRanges from './OnlineOpens.jsx'
 import { ShortStack } from './OnlineGrades.jsx'
 import { Recent, Review } from './OnlineReview.jsx'
@@ -423,7 +424,7 @@ const STAT_ROWS = [
   ['wsd', 'Won at showdown', 'Of showdowns'],
 ]
 const BAND_STYLE = { low: 'text-accent', high: 'text-accent', ok: 'text-gain' }
-const BAND_WORD = { low: 'low', high: 'high', ok: 'ok' }
+const BAND_WORD = { low: '↓low', high: '↑high', ok: 'ok' }
 
 function MyGame({ data }) {
   const { play, benchmarks } = data
@@ -528,6 +529,7 @@ function MyGame({ data }) {
 
       <ShortStack s={play.short_stack} />
       <DeepThreeBet d={play.deep_threebet} />
+      <FlopHabits f={play.flop} />
 
       <Trends trends={play.trends} ranges={benchmarks.open_by_seat} />
       <Tickets tickets={data.tournaments.tickets} />

@@ -1,5 +1,5 @@
 import Cards from '../components/Cards.jsx'
-import { band, formatPct } from '../lib/online.js'
+import { BAND_ARROW, band, formatPct } from '../lib/online.js'
 
 /*
   3-betting deep (over 40bb), from PokerEdge's analysis/deep_threebet.py.
@@ -62,7 +62,7 @@ export default function DeepThreeBet({ d }) {
                 </td>
                 <td className={`py-2 text-right align-top ${enough ? '' : 'text-faint'}`}>
                   <div>{formatPct(r.hero.pct)}</div>
-                  {b && <div className={`text-[11px] ${BAND_STYLE[b]}`}>{b}</div>}
+                  {b && <div className={`text-[11px] ${BAND_STYLE[b]}`}>{BAND_ARROW[b]}{b}</div>}
                   {!enough && <div className="text-[11px]">few</div>}
                 </td>
                 <td className="py-2 text-right align-top text-muted">{formatPct(r.pool.pct)}</td>

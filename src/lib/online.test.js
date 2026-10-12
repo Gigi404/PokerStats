@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import fixture from './online.fixture.json'
 import {
+  BAND_ARROW,
   WrongPassphraseError,
   band,
   deriveKey,
@@ -54,6 +55,12 @@ describe('online formatting', () => {
     expect(band(30, [20, 26])).toBe('high')
     expect(band(null, [20, 26])).toBeNull()
     expect(band(22, undefined)).toBeNull()
+  })
+
+  it('points out-of-range values the way they miss', () => {
+    expect(BAND_ARROW[band(18, [20, 26])]).toBe('↓')
+    expect(BAND_ARROW[band(30, [20, 26])]).toBe('↑')
+    expect(BAND_ARROW[band(22, [20, 26])]).toBe('')
   })
 })
 

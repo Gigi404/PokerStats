@@ -134,6 +134,12 @@ export const FORMAT_LABELS = {
  * @param {[number, number]|undefined} range
  * @returns {'low'|'ok'|'high'|null} null when there is nothing to compare
  */
+/**
+ * A marker for a value outside its range, beside the gold colour, so "out of
+ * range" also says which way: below ↓, above ↑, inside nothing.
+ */
+export const BAND_ARROW = { low: '↓', high: '↑', ok: '' }
+
 export function band(value, range) {
   if (value === null || value === undefined || !range) return null
   if (value < range[0]) return 'low'
