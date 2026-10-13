@@ -17,6 +17,7 @@ import { ageLabel } from '../lib/playground.js'
 import Charts from './OnlineCharts.jsx'
 import Goal from './OnlineGoal.jsx'
 import DeepThreeBet from './OnlineDeep.jsx'
+import BBDefence from './OnlineBBDefence.jsx'
 import FlopHabits from './OnlineFlop.jsx'
 import OpenRanges from './OnlineOpens.jsx'
 import { ShortStack } from './OnlineGrades.jsx'
@@ -529,6 +530,7 @@ function MyGame({ data }) {
 
       <ShortStack s={play.short_stack} />
       <DeepThreeBet d={play.deep_threebet} />
+      <BBDefence d={play.bb_defence} />
       <FlopHabits f={play.flop} />
 
       <Trends trends={play.trends} ranges={benchmarks.open_by_seat} />
