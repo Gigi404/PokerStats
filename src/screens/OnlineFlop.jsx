@@ -167,7 +167,7 @@ function LowSprGrades({ block }) {
         <div className="mt-2">
           <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-faint">Costliest</div>
           {block.costliest.map((g) => (
-            <GradeRow key={g.hand_id} g={g} />
+            <FlopGradeRow key={g.hand_id} g={g} />
           ))}
         </div>
       )}
@@ -179,7 +179,7 @@ function LowSprGrades({ block }) {
 }
 
 /** One graded decision: your cards, the board, the spot and the cost. Tap for why. */
-function GradeRow({ g }) {
+export function FlopGradeRow({ g }) {
   const [open, setOpen] = useState(false)
   const v = flopVerdict(g)
   const w = open ? flopWhy(g) : null

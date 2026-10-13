@@ -5,6 +5,8 @@ import { Badge } from '../components/ui.jsx'
 import { FORMAT_LABELS, formatSignedUSD, formatUSD, outcomeLabel } from '../lib/online.js'
 import { withSteals } from '../lib/grades.js'
 import { formatDay } from '../lib/time.js'
+import { BBGradeRow } from './OnlineBBDefence.jsx'
+import { FlopGradeRow } from './OnlineFlop.jsx'
 import { Decisions, GradeLine } from './OnlineGrades.jsx'
 
 /*
@@ -299,6 +301,7 @@ export function Review({ review, entry, onClose }) {
           </div>
 
           {review.decisions && <Decisions decisions={withSteals(review)} />}
+          <MoreGrades review={review} />
 
           <div>
             <div className={`${title} px-1`}>Key hands</div>
@@ -314,12 +317,49 @@ export function Review({ review, entry, onClose }) {
           </div>
           <p className="px-1 text-[11px] text-faint">
             {review.decisions
-              ? 'Grades cover all-in decisions before the flop — shoves and calls at 25bb or less, 3-bet jams up to 40bb, folds at 15–25bb that shoving beat — judged against what this player pool usually shoves and calls with. Other hands show what happened, not whether it was right.'
+              ? 'Grades cover all-in decisions before the flop — shoves and calls at 25bb or less, 3-bet jams up to 40bb, folds at 15–25bb that shoving beat — your big blind against one raise, and your answer to a flop bet when nearly all-in, judged against what this player pool does. Other hands show what happened, not whether it was right.'
               : 'Key hands show what happened, not whether it was right.'}
           </p>
         </div>
       </div>
     </div>
+  )
+}
+
+/**
+ * The recap's other graded decisions: the big blind against one raise and
+ * the flop when nearly all-in (play.bb_defence / play.flop grades, per
+ * tournament). Nothing when the file predates them or none happened.
+ */
+function MoreGrades({ review }) {
+  const bbs = review.bb_decisions || []
+  const flops = review.flop_decisions || []
+  if (!bbs.length && !flops.length) return null
+  return (
+    <div className="card p-3.5">
+      {bbs.length > 0 && <GradeList title="Big blind vs a raise" items={bbs} render={(g) => <BBGradeRow key={g.hand_id} g={g} />} />}
+      {flops.length > 0 && (
+        <div className={bbs.length ? 'mt-4' : ''}>
+          <GradeList title="Flop, nearly all-in" items={flops} render={(g) => <FlopGradeRow key={g.hand_id} g={g} />} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function GradeList({ title: heading, items, render }) {
+  const mistakes = items.filter((g) => g.verdict === 'mistake')
+  const cost = Math.round(mistakes.reduce((a, g) => a + g.cost_bb, 0) * 10) / 10
+  return (
+    <>
+      <div className="flex items-baseline justify-between">
+        <div className={title}>{heading}</div>
+        <div className="num text-[12px] text-muted">
+          {mistakes.length} of {items.length} mistakes{cost > 0 && <span className="text-loss"> · −{cost}bb</span>}
+        </div>
+      </div>
+      {items.map(render)}
+    </>
   )
 }
 

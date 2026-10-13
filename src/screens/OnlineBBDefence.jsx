@@ -88,7 +88,7 @@ export default function BBDefence({ d }) {
           {g.costliest?.length > 0 && (
             <div className="mt-2">
               {g.costliest.map((x) => (
-                <GradeRow key={x.hand_id} g={x} />
+                <BBGradeRow key={x.hand_id} g={x} />
               ))}
             </div>
           )}
@@ -132,7 +132,8 @@ export default function BBDefence({ d }) {
   )
 }
 
-function GradeRow({ g }) {
+/** One graded big blind decision: cards, the open, the cost. Tap for why. */
+export function BBGradeRow({ g }) {
   const [open, setOpen] = useState(false)
   const v = bbVerdict(g)
   const w = open ? bbWhy(g) : null
