@@ -23,9 +23,13 @@ const CELL = {
 }
 
 /** @param {{d: object}} props  summary.play.bb_defence */
-export default function BBDefence({ d }) {
+export default function BBDefence({ d: block }) {
   const [opener, setOpener] = useState('BTN')
-  if (!d || !d.rates) return null
+  const [game, setGame] = useState('tournament')
+  if (!block || !block.rates) return null
+  // Tournaments are the block itself (as published since v0.12.0); cash, when
+  // present, is the same shape under `cash`.
+  const d = game === 'cash' && block.cash ? block.cash : block
   const chart = d.charts?.find((c) => c.opener === opener)
   const g = d.graded
   return (
@@ -34,6 +38,19 @@ export default function BBDefence({ d }) {
       <p className="mb-2 text-[11px] text-faint">
         One raise, nobody called, you in the big blind. Defending = calling or 3-betting. Under each: this pool.
       </p>
+      {block.cash && (
+        <div className="mb-2">
+          <Segmented
+            size="sm"
+            value={game}
+            onChange={setGame}
+            options={[
+              { value: 'tournament', label: 'Tournaments' },
+              { value: 'cash', label: 'Cash' },
+            ]}
+          />
+        </div>
+      )}
       <table className="num w-full table-fixed text-sm">
         <colgroup>
           <col />
@@ -68,8 +85,9 @@ export default function BBDefence({ d }) {
         </tbody>
       </table>
       <p className="mt-1 text-[11px] text-faint">
-        Chart: the share of hands that clearly defend at 25bb against a min-raise with antes — the rest are close, so the
-        right rate is at least this.
+        Chart: the share of hands that clearly defend at {d.chart_conditions?.stack ?? 25}bb against a{' '}
+        {d.chart_conditions?.raise_to ?? 2}bb open{d.chart_conditions?.antes ? ' with antes' : ', no antes'} — the rest
+        are close, so the right rate is at least this.
       </p>
 
       {g && g.n > 0 && (

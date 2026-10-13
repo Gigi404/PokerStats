@@ -333,14 +333,26 @@ export function Review({ review, entry, onClose }) {
  */
 function MoreGrades({ review }) {
   const bbs = review.bb_decisions || []
-  const flops = review.flop_decisions || []
-  if (!bbs.length && !flops.length) return null
+  // postflop_decisions (flop, turn, river) replaced the one-day flop_decisions.
+  const post = review.postflop_decisions || review.flop_decisions || []
+  if (!bbs.length && !post.length) return null
   return (
     <div className="card p-3.5">
-      {bbs.length > 0 && <GradeList title="Big blind vs a raise" items={bbs} render={(g) => <BBGradeRow key={g.hand_id} g={g} />} />}
-      {flops.length > 0 && (
+      {bbs.length > 0 && (
+        <GradeList title="Big blind vs a raise" items={bbs} render={(g) => <BBGradeRow key={g.hand_id} g={g} />} />
+      )}
+      {post.length > 0 && (
         <div className={bbs.length ? 'mt-4' : ''}>
-          <GradeList title="Flop, nearly all-in" items={flops} render={(g) => <FlopGradeRow key={g.hand_id} g={g} />} />
+          <GradeList
+            title="Facing a bet after the flop"
+            items={post}
+            render={(g) => (
+              <div key={g.hand_id + (g.street || '')}>
+                {g.street && <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-faint">{g.street}</div>}
+                <FlopGradeRow g={g} />
+              </div>
+            )}
+          />
         </div>
       )}
     </div>

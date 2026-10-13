@@ -20,8 +20,16 @@ import { bb } from './grades.js'
 
 const ACTED = { call: 'Called', raise: 'Raised' }
 
-/** What the bettor did before the flop, in words. */
-const ROLE = { raiser: 'the preflop raiser', caller: 'a player who called preflop' }
+/** Who bet, in words. On the turn "raiser" is whoever bet or raised last before it. */
+function role(g) {
+  if (g.bettor_role === 'raiser') return g.street === 'turn' ? 'the player who led the betting before the turn' : 'the preflop raiser'
+  if (g.bettor_role === 'caller') return g.street === 'turn' ? 'a player who had only called so far' : 'a player who called preflop'
+  return 'an opponent'
+}
+
+/** The low end of equity realised on pot-odds spots (PokerEdge REALISE_LOW). */
+const REALISE_LOW = { flop: 70, turn: 85 }
+const STREETS_LEFT = { flop: 'the turn and river are', turn: 'the river is' }
 
 /** "IP" / "OOP" / "multiway" from where you sat. */
 const SITUATION = { hu_ip: 'in position', hu_oop: 'out of position', multi: 'multiway' }
@@ -31,7 +39,12 @@ const FLAG_TEXT = {
   bounty_unknown: 'Bounty not counted: winning the pot may also have won a bounty.',
   others_to_act: 'Players still to act behind you are assumed to fold.',
   big_bet: "A big bet: this pool's big bets hold more made hands than the range assumes, so folding may be better than shown.",
-  pot_odds: 'Priced on pot odds: the turn and river are not played out.',
+  raised: 'You raised: priced as a call — a raise can earn more, or less.',
+}
+
+function flagText(f, g) {
+  if (f === 'pot_odds') return `Priced on pot odds: ${STREETS_LEFT[g.street] || 'later streets are'} not played out.`
+  return FLAG_TEXT[f]
 }
 
 /**
@@ -66,9 +79,11 @@ export function flopSpot(g) {
  */
 export function flopWhy(g) {
   const lines = [
-    `The bet came from ${ROLE[g.bettor_role] || 'an opponent'}. Against what this pool bets there, you have ${g.equity}% equity.`,
+    `The bet came from ${role(g)}. Against what this pool bets there, you have ${g.equity}% equity.`,
     g.priced === 'pot_odds'
       ? `Calling needed ${g.need}% on pot odds.`
+      : g.priced === 'exact'
+      ? `Calling needed ${g.need}% — no card to come, so this is exact.`
       : `With the stacks going in, you needed ${g.need}%.`,
   ]
   const [lo, hi] = g.ev_range || [g.ev_bb, g.ev_bb]
@@ -79,12 +94,12 @@ export function flopWhy(g) {
       : 'Continuing and folding are worth about the same.'
   } else if (g.better === 'continue') {
     conclusion = g.priced === 'pot_odds'
-      ? `Continuing earns at least ${bb(lo).replace('+', '')} more than folding, even using only 70% of your equity.`
+      ? `Continuing earns at least ${bb(lo).replace('+', '')} more than folding, even using only ${REALISE_LOW[g.street] || 70}% of your equity.`
       : `Continuing earns ${bb(hi).replace('+', '')} more than folding.`
   } else {
     conclusion = `Folding earns ${bb(-hi).replace('+', '')} more than continuing${g.priced === 'pot_odds' ? ', even using all your equity' : ''}.`
   }
-  const notes = (g.flags || []).map((f) => FLAG_TEXT[f]).filter(Boolean)
+  const notes = (g.flags || []).map((f) => flagText(f, g)).filter(Boolean)
   return { lines, conclusion, notes }
 }
 
