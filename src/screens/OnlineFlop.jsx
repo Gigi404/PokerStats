@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import Cards from '../components/Cards.jsx'
 import { Segmented } from '../components/ui.jsx'
+import { flopSpot, flopTally, flopVerdict, flopWhy } from '../lib/flopGrades.js'
 import { BAND_ARROW, band, formatPct } from '../lib/online.js'
 
 /*
@@ -7,8 +9,9 @@ import { BAND_ARROW, band, formatPct } from '../lib/online.js'
   c-bet, fold to c-bet and check-raise against rough published ranges and
   this pool; then the two that matter when the pot is nearly committed
   (SPR under 3) — folding to any bet and betting first — against the pool
-  only, since no published range exists for them. The low-SPR spots will be
-  graded once built; `low_spr.spots` says how many there are to grade.
+  only, since no published range exists for them. Once there were enough,
+  your answers to a low-SPR bet are also graded in chips
+  (analysis/flop_grading.py → low_spr.graded): absent in older files.
 */
 
 // Below this many spots a rate is shown faded and not compared with typical.
@@ -82,10 +85,13 @@ export default function FlopHabits({ f }) {
           ))}
         </tbody>
       </table>
+      {f.low_spr?.graded ? (
+        <LowSprGrades block={f.low_spr.graded[game]} />
+      ) : null}
       <p className="mt-2 text-[11px] text-faint">
         Rough small-stakes ranges: outside is worth a look, not proof of a mistake. Under {MIN_SPOTS} spots is faded
         and not judged.
-        {f.low_spr && ` ${f.low_spr.spots} low-SPR bets faced so far (all games) — not graded yet.`}
+        {f.low_spr && !f.low_spr.graded && ` ${f.low_spr.spots} low-SPR bets faced so far (all games) — not graded yet.`}
       </p>
     </div>
   )
@@ -130,5 +136,89 @@ function Row({ h, cell, by }) {
         </div>
       </td>
     </tr>
+  )
+}
+
+const GTONE = { gain: 'text-gain', loss: 'text-loss', muted: 'text-muted' }
+
+/**
+ * Your answers to a low-SPR flop bet, graded in chips: the headline, the
+ * split, and the costliest mistakes (tap one for why).
+ */
+function LowSprGrades({ block }) {
+  const t = flopTally(block)
+  if (!t) return null
+  return (
+    <div className="mt-3 rounded-xl bg-surface-2 p-2.5">
+      <div className="flex items-baseline justify-between">
+        <div>
+          <span className="num text-xl font-bold">{t.mistake}</span>{' '}
+          <span className="text-sm text-muted">mistake{t.mistake === 1 ? '' : 's'} of {t.n} graded</span>
+        </div>
+        {t.cost > 0 && <span className="num text-xl font-bold text-loss">−{t.cost}bb</span>}
+      </div>
+      <div className="mt-0.5 text-[11px] text-faint">
+        {t.correct} correct · {t.close} close. {t.missed} fold{t.missed === 1 ? '' : 's'} where continuing was better
+        {t.missedBb > 0 && ` (−${t.missedBb}bb)`}, {t.bad} continue{t.bad === 1 ? '' : 's'} where folding was
+        {t.badBb > 0 && ` (−${t.badBb}bb)`}.
+        {t.ungraded > 0 && ` ${t.ungraded} multiway spots not graded.`}
+      </div>
+      {block.costliest?.length > 0 && (
+        <div className="mt-2">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-faint">Costliest</div>
+          {block.costliest.map((g) => (
+            <GradeRow key={g.hand_id} g={g} />
+          ))}
+        </div>
+      )}
+      <p className="mt-2 text-[11px] text-faint">
+        Against what this pool bets on that board, learned from the hands it showed. Estimates, not solver answers.
+      </p>
+    </div>
+  )
+}
+
+/** One graded decision: your cards, the board, the spot and the cost. Tap for why. */
+function GradeRow({ g }) {
+  const [open, setOpen] = useState(false)
+  const v = flopVerdict(g)
+  const w = open ? flopWhy(g) : null
+  return (
+    <div className="border-t border-white/5 py-2 first:border-t-0">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-2 text-left text-[13px]"
+      >
+        <span className="flex min-w-0 flex-col gap-1">
+          <span className="flex items-center gap-1.5">
+            <Cards cards={g.cards} small />
+            <span className="text-faint">on</span>
+            <Cards cards={g.board} small />
+          </span>
+          <span className="truncate text-[11px] text-muted">{flopSpot(g)}</span>
+        </span>
+        <span className={`num shrink-0 ${GTONE[v.tone]}`}>
+          {v.value} <span className="text-faint">{open ? '▴' : '▾'}</span>
+        </span>
+      </button>
+      {w && (
+        <div className="mt-2 rounded-xl bg-surface p-2.5 text-[12.5px] leading-relaxed text-muted">
+          <div className={`mb-0.5 font-semibold ${GTONE[v.tone]}`}>
+            {v.mark} {v.text}
+          </div>
+          {w.lines.map((l) => (
+            <div key={l}>{l}</div>
+          ))}
+          <div className="mt-1 font-medium text-ink">{w.conclusion}</div>
+          {w.notes.map((n) => (
+            <div key={n} className="mt-1 text-[11px] text-faint">
+              {n}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
