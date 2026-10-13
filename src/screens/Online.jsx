@@ -87,7 +87,7 @@ export default function Online() {
       ) : current === 'overview' ? (
         <Overview data={data} />
       ) : current === 'charts' ? (
-        <Charts />
+        <Charts rejam={data.play?.rejam} />
       ) : current === 'goal' ? (
         <Goal bankroll={data.bankroll} />
       ) : current === 'tournaments' ? (

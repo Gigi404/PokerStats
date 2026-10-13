@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Segmented } from '../components/ui.jsx'
 import { cellClass, combos, seatNames } from '../lib/charts.js'
+import Rejam from './OnlineRejam.jsx'
 
 /*
   Push/fold (Nash) charts — computed by PokerEdge (analysis/pushfold.py) from
@@ -33,7 +34,8 @@ function chartView(data, key, mode, callerSeat, stack) {
   return { deepest, order, pct: (100 * inRange) / 1326, max: data.stacks[data.stacks.length - 1] }
 }
 
-export default function Charts() {
+/** @param {{rejam?: object}} props  summary.play.rejam, for the Re-jam mode */
+export default function Charts({ rejam }) {
   const [data, setData] = useState(null)
   const [failed, setFailed] = useState(false)
   const [mode, setMode] = useState('shove')
@@ -54,6 +56,14 @@ export default function Charts() {
 
   const view = chartView(data, `${dealt}|${shover}|${ante}`, mode, callerSeat, stack)
 
+  if (mode === 'rejam') {
+    return (
+      <div className="space-y-3">
+        <ModeSwitch mode={mode} setMode={setMode} />
+        <Rejam r={rejam} />
+      </div>
+    )
+  }
   if (failed) return <p className="py-10 text-center text-sm text-faint">Charts aren&apos;t available in this build.</p>
   if (!data || !view) return <p className="py-10 text-center text-sm text-faint">Opening charts…</p>
 
@@ -63,15 +73,7 @@ export default function Charts() {
 
   return (
     <div className="space-y-3">
-      <Segmented
-        size="sm"
-        value={mode}
-        onChange={setMode}
-        options={[
-          { value: 'shove', label: 'Shove' },
-          { value: 'call', label: 'Call a shove' },
-        ]}
-      />
+      <ModeSwitch mode={mode} setMode={setMode} />
 
       <div className="card space-y-2.5 p-3.5">
         <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -136,5 +138,20 @@ export default function Charts() {
         </p>
       </div>
     </div>
+  )
+}
+
+function ModeSwitch({ mode, setMode }) {
+  return (
+    <Segmented
+      size="sm"
+      value={mode}
+      onChange={setMode}
+      options={[
+        { value: 'shove', label: 'Shove' },
+        { value: 'call', label: 'Call a shove' },
+        { value: 'rejam', label: 'Re-jam' },
+      ]}
+    />
   )
 }

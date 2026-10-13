@@ -96,11 +96,25 @@ export function whyLines(d) {
 
   const nash = nashLine(d)
   if (nash) lines.push(nash)
+  const rejam = rejamLine(d)
+  if (rejam) lines.push(rejam)
 
   const notes = []
   if (w.sample) notes.push(`Based on ${w.sample.toLocaleString('en-CA')} similar spots in this player pool.`)
   for (const f of d.flags || []) if (FLAG_TEXT[f]) notes.push(FLAG_TEXT[f])
   return { lines, conclusion, notes }
+}
+
+/**
+ * The re-jam equilibrium's play for a graded re-shove over an open
+ * (PokerEdge analysis/rejam.py → `rejam_pct`), as a second opinion. Null
+ * outside its 12–35bb charts and in files published before it existed.
+ */
+export function rejamLine(d) {
+  if (d.rejam_pct === undefined || d.rejam_pct === null) return null
+  const p = d.rejam_pct
+  const says = p >= 100 ? 'always jams this hand' : p <= 0 ? 'never jams this hand' : `jams this hand ${p}% of the time`
+  return `The re-jam equilibrium (if the opener called well) ${says}.`
 }
 
 /**

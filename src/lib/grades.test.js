@@ -113,3 +113,13 @@ describe('nash line', () => {
       'The Nash push/fold chart says fold; against how this pool plays, shove earns more.')
   })
 })
+
+describe('re-jam line', () => {
+  it('words the equilibrium jam %', async () => {
+    const { rejamLine } = await import('./grades.js')
+    expect(rejamLine({})).toBeNull()
+    expect(rejamLine({ rejam_pct: 100 })).toBe('The re-jam equilibrium (if the opener called well) always jams this hand.')
+    expect(rejamLine({ rejam_pct: 0 })).toContain('never jams')
+    expect(rejamLine({ rejam_pct: 60 })).toContain('60% of the time')
+  })
+})
