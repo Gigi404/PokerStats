@@ -19,6 +19,7 @@ import Goal from './OnlineGoal.jsx'
 import DeepThreeBet from './OnlineDeep.jsx'
 import BBDefence from './OnlineBBDefence.jsx'
 import FlopHabits from './OnlineFlop.jsx'
+import Sizing from './OnlineSizing.jsx'
 import OpenRanges from './OnlineOpens.jsx'
 import { ShortStack } from './OnlineGrades.jsx'
 import { Recent, Review } from './OnlineReview.jsx'
@@ -532,6 +533,7 @@ function MyGame({ data }) {
       <DeepThreeBet d={play.deep_threebet} />
       <BBDefence d={play.bb_defence} />
       <FlopHabits f={play.flop} />
+      <Sizing s={play.sizing} />
 
       <Trends trends={play.trends} ranges={benchmarks.open_by_seat} />
       <Tickets tickets={data.tournaments.tickets} />
