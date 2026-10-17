@@ -159,6 +159,34 @@ function Unlock({ onUnlock, error }) {
 // Overview
 // ---------------------------------------------------------------------------
 
+/**
+ * Satellites (and Power Path steps) on their own: paid in against the seats
+ * won at face value plus any cash — "paid $4 for a $16 seat, +$12". Their
+ * hands are not graded (chips are the wrong yardstick when a seat pays
+ * everyone the same), so this line is their whole verdict. Absent in older
+ * files and when none were played.
+ */
+function Satellites({ s }) {
+  if (!s) return null
+  return (
+    <div className="card p-3.5">
+      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Satellites</div>
+      <div className="num flex items-baseline justify-between">
+        <USD value={s.net} className="text-xl font-semibold" />
+        <span className="text-sm text-muted">{formatPct(s.roi, { signed: true })} ROI</span>
+      </div>
+      <div className="mt-0.5 text-xs text-muted">
+        {s.n} played · {formatUSD(s.paid)} paid · {s.seats} seat{s.seats === 1 ? '' : 's'} worth {formatUSD(s.seat_value)}
+        {s.cash > 0 && ` + ${formatUSD(s.cash)} cash`}
+      </div>
+      <p className="mt-1.5 text-[11px] text-faint">
+        Seats count at the value of the tournament they get you into. Satellite hands are not graded: there, surviving
+        matters more than chips.
+      </p>
+    </div>
+  )
+}
+
 function Overview({ data }) {
   const t = data.tournaments.totals
   const points = useMemo(() => tournamentCurve(data.tournaments.history), [data])
@@ -193,6 +221,8 @@ function Overview({ data }) {
         <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Running total</div>
         <ProfitChart points={points} formatAmount={usdCents} itemLabel="Tournament" emptyText="The chart appears after two tournaments." />
       </div>
+
+      <Satellites s={data.tournaments.satellites} />
 
       <Table
         title="By format"
