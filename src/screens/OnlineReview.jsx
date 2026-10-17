@@ -10,6 +10,8 @@ import { BBGradeRow } from './OnlineBBDefence.jsx'
 import { FlopGradeRow } from './OnlineFlop.jsx'
 import { Decisions, GradeLine } from './OnlineGrades.jsx'
 import Recap from './OnlineRecap.jsx'
+import Replay from './OnlineReplay.jsx'
+import { canReplay } from '../lib/replay.js'
 import { gradeTone, luckLine } from '../lib/recap.js'
 
 /*
@@ -397,10 +399,13 @@ export function Review({ review, entry, onClose }) {
  * every key hand — each folded until asked for.
  */
 function RecapReview({ review, entry }) {
+  const [replay, setReplay] = useState(null) // { hand, heading }
   const graded = (review.decisions?.length || 0) + (review.steals?.length || 0) + (review.bb_decisions?.length || 0) + (review.postflop_decisions?.length || 0)
+  const onReplay = (hand, heading) => setReplay({ hand, heading })
   return (
     <div className="space-y-4">
-      <Recap review={review} entry={entry} renderHand={(h) => <Hand h={h} />} />
+      {replay && createPortal(<Replay hand={replay.hand} heading={replay.heading} onClose={() => setReplay(null)} />, document.body)}
+      <Recap review={review} entry={entry} onReplay={onReplay} />
       <div className="card divide-y divide-white/5">
         <Disclosure label="Every graded decision" count={graded}>
           <div className="space-y-4">
@@ -425,7 +430,7 @@ function RecapReview({ review, entry }) {
         <Disclosure label="Every key hand" count={review.key_hands.length}>
           <div className="space-y-2">
             {review.key_hands.map((h) => (
-              <Hand key={h.hand_id} h={h} />
+              <Hand key={h.hand_id} h={h} onReplay={canReplay(h) ? () => onReplay(h, `Key hand · ${h.time}`) : null} />
             ))}
           </div>
         </Disclosure>
@@ -603,7 +608,8 @@ const TAG_STYLE = {
   'all-in': 'bg-accent/15 text-accent',
 }
 
-function Hand({ h }) {
+/** A key hand as a card. `onReplay`, when given, adds a Replay button (recap files). */
+function Hand({ h, onReplay = null }) {
   return (
     <div className="card p-3.5">
       <div className="flex items-start justify-between gap-3">
@@ -651,6 +657,11 @@ function Hand({ h }) {
       )}
 
       {h.grade && <GradeLine d={h.grade} />}
+      {onReplay && (
+        <button type="button" onClick={onReplay} className="mt-2.5 w-full rounded-xl bg-surface-2 py-2 text-sm font-semibold text-accent active:opacity-80">
+          Replay this hand ›
+        </button>
+      )}
     </div>
   )
 }

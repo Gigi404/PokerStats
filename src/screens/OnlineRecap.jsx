@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import Cards from '../components/Cards.jsx'
+import { canReplay } from '../lib/replay.js'
 import { formatSignedUSD, outcomeLabel } from '../lib/online.js'
 import {
   exampleWhere,
@@ -30,18 +30,18 @@ const TONE_TEXT = { gain: 'text-gain', loss: 'text-loss', accent: 'text-accent',
 const TONE_FILL = { gain: 'var(--color-gain)', loss: 'var(--color-loss)', accent: 'var(--color-accent)', muted: 'var(--color-muted)' }
 
 /**
- * @param {{review: object, entry: object, renderHand: (h: object) => JSX.Element}} props
+ * @param {{review: object, entry: object, onReplay: (hand: object, heading: string) => void}} props
  *   review: one tournament of summary.recent_days; entry: its history row;
- *   renderHand: draws a key hand (the review's own Hand card).
+ *   onReplay: opens the replay of a key hand.
  */
-export default function Recap({ review, entry, renderHand }) {
+export default function Recap({ review, entry, onReplay }) {
   const recap = review.recap
   return (
     <>
       <GradeCard recap={recap} entry={entry} luck={review.luck} />
       <WorkOn recap={recap} />
       <Timeline review={review} recap={recap} />
-      <HowItWent review={review} recap={recap} renderHand={renderHand} />
+      <HowItWent review={review} recap={recap} onReplay={onReplay} />
     </>
   )
 }
@@ -278,27 +278,25 @@ function timelineLabel(review, recap, times) {
 // How it went
 // ---------------------------------------------------------------------------
 
-function HowItWent({ review, recap, renderHand }) {
-  const [open, setOpen] = useState(null)
+function HowItWent({ review, recap, onReplay }) {
   if (!recap.turning_points.length) return null
   const keyHands = Object.fromEntries((review.key_hands || []).map((h) => [String(h.hand_id), h]))
   return (
     <div>
-      <div className={`${title} px-1`}>How it went · tap to see the hand</div>
+      <div className={`${title} px-1`}>How it went · tap a hand to replay it</div>
       <div className="card divide-y divide-white/5 px-3.5">
         {recap.turning_points.map((p, k) => {
           const id = p.kind === 'stretch' ? p.worst_hand_id : p.hand_id
           const kh = keyHands[String(id)]
+          const playable = canReplay(kh)
           const t = turningText(p, kh)
           const key = `${p.kind}-${p.i}`
-          const isOpen = open === key
           return (
             <div key={key} className="py-3">
               <button
                 type="button"
-                onClick={() => setOpen(isOpen ? null : key)}
-                disabled={!kh}
-                aria-expanded={kh ? isOpen : undefined}
+                onClick={() => onReplay(kh, `Turning point ${k + 1}`)}
+                disabled={!playable}
                 className="flex w-full items-start gap-3 text-left disabled:cursor-default"
               >
                 <span
@@ -314,9 +312,11 @@ function HowItWent({ review, recap, renderHand }) {
                   </span>
                   <span className="mt-0.5 block text-[12.5px] leading-snug text-muted">{t.detail}</span>
                 </span>
-                <span className={`num shrink-0 text-[13px] font-semibold ${TONE_TEXT[t.tone]}`}>{t.value}</span>
+                <span className="flex shrink-0 flex-col items-end">
+                  <span className={`num text-[13px] font-semibold ${TONE_TEXT[t.tone]}`}>{t.value}</span>
+                  {playable && <span className="mt-0.5 text-[11px] text-accent">Replay ›</span>}
+                </span>
               </button>
-              {isOpen && kh && <div className="mt-2.5">{renderHand(kh)}</div>}
             </div>
           )
         })}
