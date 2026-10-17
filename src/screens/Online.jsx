@@ -22,6 +22,7 @@ import FlopHabits from './OnlineFlop.jsx'
 import Sizing from './OnlineSizing.jsx'
 import Postflop from './OnlinePostflop.jsx'
 import OpenRanges from './OnlineOpens.jsx'
+import OpenResponse from './OnlineOpenResponse.jsx'
 import { ShortStack } from './OnlineGrades.jsx'
 import { Recent, Review } from './OnlineReview.jsx'
 import { formatDay } from '../lib/time.js'
@@ -504,6 +505,7 @@ function MyGame({ data }) {
 
       <OpenBySeat open={play.open_by_seat} ranges={benchmarks.open_by_seat} />
       <OpenRanges o={play.open_ranges} />
+      <OpenResponse r={play.open_response} />
 
       <div className="card p-3.5">
         <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">By stack size · tournaments</div>
