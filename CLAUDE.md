@@ -204,6 +204,40 @@ Everything reads PokerEdge's summary; the app judges nothing itself.
 - Gotcha: a headless test browser kept serving an old build from its service
   worker after a rebuild; a fresh `--user-data-dir` fixed it.
 
+### 2026-10-17 — Recap, replay, Puzzles, More, Review notes (v0.18.0 → v0.21.0)
+Phase 8 steps 1–4, from mockups the owner chose (PokerEdge's CLAUDE.md has the
+data side and the decisions). Everything still reads PokerEdge's summary.
+- **v0.18.0 — the recap** (`OnlineRecap.jsx`, `lib/recap.js`): a review opens on
+  the grade (letter, accuracy, right / inaccuracy / mistake / blunder bar, a
+  sentence, the all-in luck line), "Work on" with an example hand, the timeline
+  (stack over real time, blind levels, mistake ticks, numbered turning points,
+  the mistake stretch shaded) and "How it went". Every decision, stats and key
+  hands fold below. Day cards show the night's grade and luck, rows a letter.
+  Progress leads with weekly accuracy (`accuracyHeadline`), bb per 100 in the
+  week detail. Files without `review.recap` keep the old review.
+- **v0.19.0 — the replay** (`OnlineReplay.jsx`, `lib/replay.js`): a key hand street
+  by street — board, pot at the start of each street, action so far, each grade
+  with its reason on its street, the all-in equity, a result step ("the cards,
+  not you"). From "How it went" and "Replay this hand" under key hands.
+- **v0.20.0 — Puzzles and More** (`Puzzles.jsx`, `lib/puzzles.js`, `More.jsx`): the
+  tab bar is Sessions · Online · Puzzles · Stats · More; Playground and Backup
+  under More (the backup nudge opens it). Puzzles from play.puzzles, leaks first
+  (two mistakes per clearly-right one within an area), filters by spot; a Leitner
+  schedule in IndexedDB meta `puzzles` (wrong: back in 10 min; right: 1/3/7/21
+  days). `Unlock` is exported from `Online.jsx` for the tab.
+- **v0.21.0 — Review notes** (`components/ReviewSheet.jsx`, `lib/reviewNotes.js`):
+  the owner's ask before the "less dense" pass — a floating ✎ Review button
+  (hideable; also under More) opens a 35-item checklist by screen with Like /
+  Dislike / Want more / Remove / Move and a note each, saved in meta
+  `reviewNotes`; "Share notes" sends them as text for the next session.
+- 96 tests, lint clean. Every screen checked at 390px in headless Chrome over the
+  DevTools protocol against a real summary (throwaway passphrase); that caught
+  overlapping level labels and leaks-first opening on a right answer. **Not on a
+  real phone.** Pushed and deployed through v0.20.0; v0.21.0 committed.
+- Gotchas: `vite preview` serves only files present when it started — restart
+  after each rebuild. React lint refuses `Date.now()` in render and choosing
+  state in an effect (`Puzzles.jsx` keeps the clock in state).
+
 ## Rejected approaches
 - Beast backend (Flask + SQLite): her iPhone would need Tailscale, plus the
   Doze-style tunnel drops seen on the Pixel. Revisit only as optional sync.
