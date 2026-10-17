@@ -177,6 +177,33 @@ The version bump rewrote package.json's line endings again (sed); caught and
 redone byte-safe before the commit — **bump the version with a byte-level
 replace, never sed.**
 
+### 2026-10-16/17 — Decisions, Progress, When you open, Satellites, live-only form (v0.17.1)
+Everything reads PokerEdge's summary; the app judges nothing itself.
+- **Recent day card: a Decisions block** (`lib/scorecard.js`): graded / right /
+  close / mistakes with a bar, bb the mistakes cost, the costliest one (tap: its
+  tournament), per grader behind a tap. Hidden on a day with nothing graded.
+- **Why panel**: says when a grade is "close" only because of the measured
+  margin (PokerEdge's backtest found the model ~0.9bb optimistic at 10–15bb).
+- **My game: Progress** at the top (`OnlineProgress.jsx`, `lib/progress.js`) —
+  bb given away per 100 graded decisions per week, luck-free; tap a week.
+- **My game: "When you open"** (`OnlineOpenResponse.jsx`) — how the table answers
+  an open, by size, and the hands callers showed.
+- **Overview: Satellites** — paid vs seats won at face value + cash. Satellite
+  hands are no longer graded upstream.
+- **Session form is live only** (`SessionForm.jsx`, `lib/venues.js`): Where is a
+  dropdown (Casino de Montréal, Playground, past venues, home games stored as
+  `"Home game · <name>"`, "+ New home game…"); cash stakes a dropdown (1/2 NL,
+  1/2 PLO, past stakes, Other); a home-game tournament picks its sit & go format
+  (new `chips` field + first buy-in, remembered per home game). Date / arrived /
+  left on one row; special night and notes fold away. Old hand-logged online
+  sessions stay editable and counted. 'Home game' left the event presets.
+- Checked at 390px in headless Chrome against a real summary (throwaway
+  passphrase), incl. the new-home-game and new-format steps. **Not on a real
+  phone** — the one-row date on iOS is the layout to look at.
+- Version bumps by sed this time were checked: one-line diffs, LF kept.
+- Gotcha: a headless test browser kept serving an old build from its service
+  worker after a rebuild; a fresh `--user-data-dir` fixed it.
+
 ## Rejected approaches
 - Beast backend (Flask + SQLite): her iPhone would need Tailscale, plus the
   Doze-style tunnel drops seen on the Pixel. Revisit only as optional sync.
