@@ -3,6 +3,7 @@ import { Field, Profit, Segmented, inputClass } from '../components/ui.jsx'
 import { centsToInput, formatMoney, toCents } from '../lib/money.js'
 import { EVENT_PRESETS, minutesPlayed, profit, totalIn, validate } from '../lib/sessions.js'
 import { distinctValues } from '../lib/stats.js'
+import { formatLabel, homeFormats, homeName, homeVenue, isHomeGame, stakesOptions, venueOptions } from '../lib/venues.js'
 import { formatDuration, nowHHMM } from '../lib/time.js'
 
 /**
@@ -17,6 +18,10 @@ import { formatDuration, nowHHMM } from '../lib/time.js'
  *        start  = just sat down (saved as in-play)
  *        finish = cashing out of an in-play session (end time pre-filled)
  * @param {object[]} props.sessions  every session, for venue/game suggestions
+ *
+ * Live only since 2026-10-16: online results arrive on the Online tab by
+ * themselves. Where and the stakes are dropdowns (lib/venues.js); a home
+ * game tournament picks its sit & go format, which fills the buy-in.
  */
 export default function SessionForm({ session, mode: initialMode, sessions, onSave, onDelete, onClose }) {
   // Mode can change once: "Finish now" on an in-play session turns the edit
@@ -27,6 +32,8 @@ export default function SessionForm({ session, mode: initialMode, sessions, onSa
   const [error, setError] = useState(null)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // Special night + notes fold away unless the session already has one.
+  const [more, setMore] = useState(() => Boolean(session.event || session.notes))
 
   const set = (patch) => {
     setDraft((d) => ({ ...d, ...patch }))
@@ -37,7 +44,7 @@ export default function SessionForm({ session, mode: initialMode, sessions, onSa
   const online = draft.setting === 'online'
   const inPlay = draft.status === 'active'
 
-  const venues = useMemo(() => distinctValues(sessions, 'venue'), [sessions])
+  const home = isHomeGame(draft.venue)
   const games = useMemo(
     () => distinctValues(sessions.filter((s) => s.format === draft.format), 'game'),
     [sessions, draft.format],
@@ -99,78 +106,76 @@ export default function SessionForm({ session, mode: initialMode, sessions, onSa
           </Field>
         )}
 
-        <div className="grid grid-cols-1 gap-2">
-          <Segmented
-            value={draft.format}
-            onChange={(format) => set({ format })}
-            options={[
-              { value: 'cash', label: 'Cash game' },
-              { value: 'tournament', label: 'Tournament' },
-            ]}
-          />
-          <Segmented
-            size="sm"
-            value={draft.setting}
-            onChange={(setting) => set({ setting })}
-            options={[
-              { value: 'live', label: 'Live' },
-              { value: 'online', label: 'Online' },
-            ]}
-          />
-        </div>
+        <Segmented
+          value={draft.format}
+          onChange={(format) => set({ format })}
+          options={[
+            { value: 'cash', label: 'Cash game' },
+            { value: 'tournament', label: 'Tournament' },
+          ]}
+        />
+        {online && (
+          <p className="-mt-2 text-xs text-faint">
+            Logged by hand as an online session. Online results now arrive by themselves on the Online tab.
+          </p>
+        )}
 
         {/* Tournament result — also first when finishing one. */}
         {tourney && mode === 'finish' && <TournamentResult draft={draft} set={set} autoFocus />}
 
-        <Field label={online ? 'Site' : 'Casino'}>
-          <input
-            className={inputClass}
-            list="venues"
-            value={draft.venue}
-            placeholder={online ? 'PokerStars, GGPoker…' : 'Casino de Montréal…'}
-            onChange={(e) => set({ venue: e.target.value })}
-          />
-          <datalist id="venues">
-            {venues.map((v) => (
-              <option key={v} value={v} />
-            ))}
-          </datalist>
-        </Field>
+        <div className="grid grid-cols-2 gap-2 [&>*]:min-w-0">
+          <VenueSelect sessions={sessions} value={draft.venue} onChange={(venue) => set({ venue })} />
+          {!tourney ? (
+            <StakesSelect sessions={sessions} value={draft.game} onChange={(game) => set({ game })} />
+          ) : home ? (
+            <HomeFormatSelect
+              sessions={sessions}
+              venue={draft.venue}
+              draft={draft}
+              onPick={(buyIn, chips) =>
+                set({
+                  chips,
+                  buyIns: [centsToInput(buyIn), ...draft.buyIns.slice(1)],
+                  game: draft.game || `Sit & go ${formatLabel(buyIn, chips)}`,
+                })
+              }
+            />
+          ) : (
+            <Field label="Tournament">
+              <input
+                className={inputClass}
+                list="games"
+                value={draft.game}
+                placeholder="Name…"
+                onChange={(e) => set({ game: e.target.value })}
+              />
+              <datalist id="games">
+                {games.map((g) => (
+                  <option key={g} value={g} />
+                ))}
+              </datalist>
+            </Field>
+          )}
+        </div>
 
-        <Field label={tourney ? 'Tournament' : 'Game / stakes'}>
-          <input
-            className={inputClass}
-            list="games"
-            value={draft.game}
-            placeholder={tourney ? 'Tuesday $150 NLH…' : '1/2 NLH, 2/5 PLO…'}
-            onChange={(e) => set({ game: e.target.value })}
-          />
-          <datalist id="games">
-            {games.map((g) => (
-              <option key={g} value={g} />
-            ))}
-          </datalist>
-        </Field>
-
-        {/* Date gets its own row: iOS renders it as "Sep 24, 2026", too wide for a third of the screen. */}
-        <Field label="Date">
-          <input type="date" className={inputClass} value={draft.date} onChange={(e) => set({ date: e.target.value })} />
-        </Field>
-        <div className="grid grid-cols-2 gap-2">
+        {/* One row: the date takes the widest column (iOS writes it out as "Oct 16, 2026"). */}
+        <div className="grid grid-cols-[1.25fr_1fr_1fr] gap-1.5 [&>*]:min-w-0">
+          <Field label="Date">
+            <input type="date" className={`${inputClass} min-w-0 px-2 text-[15px]`} value={draft.date} onChange={(e) => set({ date: e.target.value })} />
+          </Field>
           <Field label="Arrived">
-            <input type="time" className={`${inputClass} px-2`} value={draft.start} onChange={(e) => set({ start: e.target.value })} />
+            <input type="time" className={`${inputClass} min-w-0 px-2`} value={draft.start} onChange={(e) => set({ start: e.target.value })} />
           </Field>
           <Field label="Left">
             <input
               type="time"
-              className={`${inputClass} px-2`}
+              className={`${inputClass} min-w-0 px-2`}
               value={draft.end}
               disabled={inPlay && mode !== 'finish'}
               onChange={(e) => set({ end: e.target.value })}
             />
           </Field>
         </div>
-        {online && <p className="-mt-3 text-xs text-faint">Times are optional online. Sessions without them are left out of $/hour.</p>}
 
         {/* Buy-ins: the first, then any rebuys / re-entries / add-ons. */}
         <div>
@@ -215,6 +220,21 @@ export default function SessionForm({ session, mode: initialMode, sessions, onSa
 
         {tourney && mode !== 'finish' && !inPlay && <TournamentResult draft={draft} set={set} />}
 
+        <button
+          type="button"
+          onClick={() => setMore((v) => !v)}
+          aria-expanded={more}
+          className="flex w-full items-center justify-between rounded-xl bg-surface-2 px-3.5 py-2.5 text-sm text-muted"
+        >
+          <span>
+            Special night · notes
+            {!more && (draft.event || draft.notes) ? <span className="text-faint"> · filled in</span> : null}
+          </span>
+          <span>{more ? '▴' : '▾'}</span>
+        </button>
+
+        {more && (
+        <>
         {/* Special night */}
         <div>
           <div className="mb-1.5 text-sm font-medium text-muted">Special night / event</div>
@@ -249,6 +269,8 @@ export default function SessionForm({ session, mode: initialMode, sessions, onSa
             onChange={(e) => set({ notes: e.target.value })}
           />
         </Field>
+        </>
+        )}
 
         {mode === 'edit' && (
           <div className="pt-2">
@@ -370,6 +392,7 @@ function toDraft(session, mode) {
     bounties: centsToInput(session.bounties),
     place: session.place ? String(session.place) : '',
     entrants: session.entrants ? String(session.entrants) : '',
+    chips: session.chips ?? null,
   }
   // Cashing out: the time she left is now, unless it was already filled in.
   if (mode === 'finish' && !draft.end && draft.setting === 'live') draft.end = nowHHMM()
@@ -393,4 +416,201 @@ function fromDraft(draft) {
     place: int(draft.place),
     entrants: int(draft.entrants),
   }
+}
+
+// ---------------------------------------------------------------------------
+// Where / stakes / home-game format: dropdowns with "add one" in place
+// ---------------------------------------------------------------------------
+
+const NEW = '__new__'
+const selectClass = `${inputClass} appearance-none pr-8`
+
+/** A select with a chevron, the shared look of the three dropdowns. */
+function Select({ label, value, onChange, children }) {
+  return (
+    <Field label={label}>
+      <div className="relative">
+        <select className={selectClass} value={value} onChange={(e) => onChange(e.target.value)}>
+          {children}
+        </select>
+        <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-faint">▾</span>
+      </div>
+    </Field>
+  )
+}
+
+/** A one-line "name it" input with OK and ×, shown in place of a dropdown when "+ New …" is picked. */
+function AddInline({ label, placeholder, onAdd, onCancel }) {
+  const [text, setText] = useState('')
+  const add = () => text.trim() && onAdd(text.trim())
+  return (
+    <Field label={label}>
+      <div className="flex gap-1.5">
+        <input
+          autoFocus
+          className={`${inputClass} min-w-0 px-2.5`}
+          value={text}
+          placeholder={placeholder}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              add()
+            }
+          }}
+        />
+        <button type="button" onClick={add} className="shrink-0 rounded-xl btn-gold px-2.5 text-sm font-semibold text-accent-ink">
+          OK
+        </button>
+        <button type="button" aria-label="Cancel" onClick={onCancel} className="shrink-0 rounded-xl bg-surface-2 px-2.5 text-muted">
+          ×
+        </button>
+      </div>
+    </Field>
+  )
+}
+
+/** Where: the casino, Playground, any other place played, and the home games. */
+function VenueSelect({ sessions, value, onChange }) {
+  const [adding, setAdding] = useState(false)
+  const { places, homes } = useMemo(() => venueOptions(sessions, value), [sessions, value])
+  if (adding) {
+    return (
+      <AddInline
+        label="New home game"
+        placeholder="Whose? e.g. Marc"
+        onAdd={(name) => {
+          onChange(homeVenue(name))
+          setAdding(false)
+        }}
+        onCancel={() => setAdding(false)}
+      />
+    )
+  }
+  return (
+    <Select label="Where" value={value || ''} onChange={(v) => (v === NEW ? setAdding(true) : onChange(v))}>
+      {!value && <option value="">Choose…</option>}
+      {places.map((p) => (
+        <option key={p} value={p}>
+          {p}
+        </option>
+      ))}
+      <optgroup label="Home games">
+        {homes.map((h) => (
+          <option key={h} value={h}>
+            {homeName(h)}
+          </option>
+        ))}
+        <option value={NEW}>+ New home game…</option>
+      </optgroup>
+    </Select>
+  )
+}
+
+/** Stakes for a cash game: 1/2 NL, 1/2 PLO, whatever else she has played, or a new one. */
+function StakesSelect({ sessions, value, onChange }) {
+  const [adding, setAdding] = useState(false)
+  const options = useMemo(() => stakesOptions(sessions, value), [sessions, value])
+  if (adding) {
+    return (
+      <AddInline
+        label="Stakes"
+        placeholder="e.g. 2/5 NL"
+        onAdd={(v) => {
+          onChange(v)
+          setAdding(false)
+        }}
+        onCancel={() => setAdding(false)}
+      />
+    )
+  }
+  return (
+    <Select label="Stakes" value={value || ''} onChange={(v) => (v === NEW ? setAdding(true) : onChange(v))}>
+      {!value && <option value="">Choose…</option>}
+      {options.map((o) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
+      <option value={NEW}>Other…</option>
+    </Select>
+  )
+}
+
+/**
+ * A home game's sit & go format ("$50 · 1,500 chips"). Picking one fills the
+ * buy-in and the starting chips. A home game with no format yet, or "+ New
+ * format", asks for both: $ in and chips, saved on OK.
+ */
+function HomeFormatSelect({ sessions, venue, draft, onPick }) {
+  const saved = useMemo(() => homeFormats(sessions, venue), [sessions, venue])
+  const [adding, setAdding] = useState(false)
+  const [buyIn, setBuyIn] = useState('')
+  const [chips, setChips] = useState('')
+  const firstIn = toCents(draft.buyIns[0])
+  const matches = (f) => f.buyIn === firstIn && (f.chips || null) === (draft.chips || null)
+  // A format just entered is not saved anywhere until the session is, so it
+  // joins the list from the draft itself.
+  const formats =
+    draft.chips && firstIn && !saved.some(matches)
+      ? [{ key: `${firstIn}|${draft.chips}`, buyIn: firstIn, chips: draft.chips, label: formatLabel(firstIn, draft.chips) }, ...saved]
+      : saved
+  const current = formats.find(matches)
+
+  if (adding || !formats.length) {
+    const add = () => {
+      const cents = toCents(buyIn)
+      if (!cents) return
+      onPick(cents, parseInt(chips, 10) || null)
+      setAdding(false)
+    }
+    return (
+      <Field label={formats.length ? 'New format' : 'Format'}>
+        <div className="flex gap-1.5">
+          <input
+            autoFocus={adding}
+            inputMode="decimal"
+            className={`${inputClass} num min-w-0 px-2`}
+            placeholder="$ in"
+            value={buyIn}
+            onChange={(e) => setBuyIn(e.target.value)}
+          />
+          <input
+            inputMode="numeric"
+            className={`${inputClass} num min-w-0 px-2`}
+            placeholder="chips"
+            value={chips}
+            onChange={(e) => setChips(e.target.value.replace(/\D/g, ''))}
+          />
+          <button type="button" onClick={add} className="shrink-0 rounded-xl btn-gold px-2.5 text-sm font-semibold text-accent-ink">
+            OK
+          </button>
+          {formats.length > 0 && (
+            <button type="button" aria-label="Cancel" onClick={() => setAdding(false)} className="shrink-0 rounded-xl bg-surface-2 px-2.5 text-muted">
+              ×
+            </button>
+          )}
+        </div>
+      </Field>
+    )
+  }
+  return (
+    <Select
+      label="Format"
+      value={current ? current.key : ''}
+      onChange={(v) => {
+        if (v === NEW) return setAdding(true)
+        const f = formats.find((x) => x.key === v)
+        if (f) onPick(f.buyIn, f.chips)
+      }}
+    >
+      {!current && <option value="">Choose…</option>}
+      {formats.map((f) => (
+        <option key={f.key} value={f.key}>
+          {f.label}
+        </option>
+      ))}
+      <option value={NEW}>+ New format…</option>
+    </Select>
+  )
 }

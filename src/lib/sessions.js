@@ -18,6 +18,7 @@
       cashOut: cents|null,            // cash only
       prize: cents|null, bounties: cents|null,
       place: number|null, entrants: number|null,   // tournament only
+      chips: number|null,             // tournament: starting chips (a home game's sit & go format)
       event: '',                      // special night: "Bad Beat Jackpot", "Promo night", ...
       notes: '', createdAt, updatedAt,
     }
@@ -35,7 +36,8 @@ export const FORMATS = { CASH: 'cash', TOURNAMENT: 'tournament' }
 export const SETTINGS = { LIVE: 'live', ONLINE: 'online' }
 
 /** Suggested special-night tags. She can type her own; these are just one tap away. */
-export const EVENT_PRESETS = ['Bad Beat Jackpot', 'High Hand', 'Promo night', 'Freeroll', 'Home game']
+// 'Home game' left the presets 2026-10-16: home games are venues now (venues.js).
+export const EVENT_PRESETS = ['Bad Beat Jackpot', 'High Hand', 'Promo night', 'Freeroll']
 
 function newId() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID()
@@ -66,6 +68,7 @@ export function newSession(overrides = {}) {
     bounties: null,
     place: null,
     entrants: null,
+    chips: null,
     event: '',
     notes: '',
     createdAt: now,

@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import ActiveSession from '../components/ActiveSession.jsx'
 import InstallBanner from '../components/InstallBanner.jsx'
 import Logo from '../components/Logo.jsx'
-import { Badge, Profit, Segmented } from '../components/ui.jsx'
+import { Badge, Profit } from '../components/ui.jsx'
 import { compareSessions, isActive, isTournament, minutesPlayed, ordinal, profit } from '../lib/sessions.js'
 import { netProfit } from '../lib/stats.js'
 import { formatDuration, formatMonth, todayKey } from '../lib/time.js'
@@ -12,8 +12,6 @@ import { formatDuration, formatMonth, todayKey } from '../lib/time.js'
  * finished session newest first, grouped by month with each month's total.
  */
 export default function Sessions({ sessions, installed, backupDue, onStart, onAdd, onOpen, onRebuy, onFinish, onBackup }) {
-  const [setting, setSetting] = useState('live')
-
   const active = sessions.filter(isActive)
   const done = useMemo(() => sessions.filter((s) => !isActive(s)).sort(compareSessions).reverse(), [sessions])
 
@@ -71,23 +69,15 @@ export default function Sessions({ sessions, installed, backupDue, onStart, onAd
         <ActiveSession key={s.id} session={s} onRebuy={onRebuy} onFinish={onFinish} onOpen={onOpen} />
       ))}
 
-      {/* Start — the "I just sat down" buttons */}
+      {/* Start — the "I just sat down" buttons. Live only: online results
+          arrive by themselves on the Online tab (2026-10-16). */}
       <div className="space-y-2.5 card p-4">
         <div className="text-xs font-semibold uppercase tracking-[0.14em] text-faint">Start a session</div>
-        <Segmented
-          size="sm"
-          value={setting}
-          onChange={setSetting}
-          options={[
-            { value: 'live', label: 'Live' },
-            { value: 'online', label: 'Online' },
-          ]}
-        />
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => onStart('cash', setting)} className="rounded-2xl btn-gold py-3.5 text-[17px] font-bold">
+          <button type="button" onClick={() => onStart('cash', 'live')} className="rounded-2xl btn-gold py-3.5 text-[17px] font-bold">
             Cash game
           </button>
-          <button type="button" onClick={() => onStart('tournament', setting)} className="rounded-2xl btn-gold py-3.5 text-[17px] font-bold">
+          <button type="button" onClick={() => onStart('tournament', 'live')} className="rounded-2xl btn-gold py-3.5 text-[17px] font-bold">
             Tournament
           </button>
         </div>
