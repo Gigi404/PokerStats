@@ -9,6 +9,8 @@ import { formatDay } from '../lib/time.js'
 import { BBGradeRow } from './OnlineBBDefence.jsx'
 import { FlopGradeRow } from './OnlineFlop.jsx'
 import { Decisions, GradeLine } from './OnlineGrades.jsx'
+import Recap from './OnlineRecap.jsx'
+import { gradeTone, luckLine } from '../lib/recap.js'
 
 /*
   The review half of the Online tab: the last few days played, day by day,
@@ -84,6 +86,8 @@ function Day({ day, byId, onOpen }) {
       {day.scorecard && (
         <Scorecard
           sc={day.scorecard}
+          grade={day.grade}
+          luck={day.luck}
           onCostliest={() => {
             const r = day.tournaments.find((t) => t.id === day.scorecard.costliest?.tournament_id)
             if (r && byId[r.id]) onOpen(r)
@@ -118,6 +122,11 @@ function Day({ day, byId, onOpen }) {
                 <div className="flex items-center gap-1.5">
                   <span className="font-semibold">{formatUSD(e.buy_in)}</span>
                   <Badge>{FORMAT_LABELS[e.format] || e.format}</Badge>
+                  {r.recap?.grade?.grade && (
+                    <span className={`num text-sm font-bold ${{ gain: 'text-gain', accent: 'text-accent', loss: 'text-loss' }[gradeTone(r.recap.grade.grade)]}`}>
+                      {r.recap.grade.grade}
+                    </span>
+                  )}
                 </div>
                 <div className="mt-0.5 text-xs text-muted">
                   {startLabel(e.start, day.date)} · {outcomeLabel(e)} · {r.key_hands.length} key hand{r.key_hands.length === 1 ? '' : 's'}
@@ -173,11 +182,14 @@ function StatStrip({ stats }) {
  * correct / close / mistake bar, the costliest mistake (tap: its tournament)
  * and, folded, the count per kind of decision.
  */
-function Scorecard({ sc, onCostliest }) {
+function Scorecard({ sc, grade, luck, onCostliest }) {
   const [open, setOpen] = useState(false)
   const h = headline(sc)
   const s = shares(sc)
   const c = sc.costliest
+  // The night's grade and all-in luck (Phase 8); absent in older files.
+  const letter = grade?.grade
+  const luckL = luckLine(luck)
   return (
     <div className="border-t border-white/5 px-4 py-3">
       <button
@@ -186,7 +198,15 @@ function Scorecard({ sc, onCostliest }) {
         aria-expanded={open}
         className="flex w-full items-baseline justify-between gap-3 text-left"
       >
-        <span className="text-sm font-semibold">Decisions</span>
+        <span className="text-sm font-semibold">
+          Decisions
+          {letter && (
+            <span className={`num ml-2 font-bold ${{ gain: 'text-gain', accent: 'text-accent', loss: 'text-loss' }[gradeTone(letter)] || 'text-muted'}`}>
+              {letter}
+              <span className="ml-1 text-xs font-normal text-muted">{grade.accuracy}%</span>
+            </span>
+          )}
+        </span>
         <span className="num text-xs text-muted">
           {h.counts}
           {h.cost && <span className="ml-1.5 font-semibold text-loss">{h.cost}</span>} {open ? '▴' : '▾'}
@@ -202,6 +222,9 @@ function Scorecard({ sc, onCostliest }) {
         <span>{sc.close} close</span>
         <span>{sc.mistakes} mistakes</span>
       </div>
+      {luckL && (
+        <div className={`mt-1.5 text-[11.5px] ${{ gain: 'text-gain', loss: 'text-loss' }[luckL.tone] || 'text-muted'}`}>{luckL.text}</div>
+      )}
 
       {c && (
         <button type="button" onClick={onCostliest} className="mt-2.5 flex w-full items-center gap-2.5 rounded-xl bg-surface-2 p-2.5 text-left active:opacity-80">
@@ -362,6 +385,84 @@ export function Review({ review, entry, onClose }) {
           </button>
         </div>
 
+        {review.recap ? <RecapReview review={review} entry={entry} /> : <FullReview review={review} entry={entry} />}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The review for files with a recap (Phase 8): the recap first, then the
+ * detail one tap down — every graded decision, the stats and checks, and
+ * every key hand — each folded until asked for.
+ */
+function RecapReview({ review, entry }) {
+  const graded = (review.decisions?.length || 0) + (review.steals?.length || 0) + (review.bb_decisions?.length || 0) + (review.postflop_decisions?.length || 0)
+  return (
+    <div className="space-y-4">
+      <Recap review={review} entry={entry} renderHand={(h) => <Hand h={h} />} />
+      <div className="card divide-y divide-white/5">
+        <Disclosure label="Every graded decision" count={graded}>
+          <div className="space-y-4">
+            {review.decisions && <Decisions decisions={withSteals(review)} />}
+            <MoreGrades review={review} />
+          </div>
+        </Disclosure>
+        <Disclosure label="Stats and checks" count={null}>
+          <div className="card-hero p-4">
+            <div className="text-sm text-muted">
+              Buy-in {formatUSD(entry.buy_in)}
+              {entry.prize > 0 && ` · prize ${formatUSD(entry.prize)}`}
+              {entry.ticket && ` · ${entry.seat_for ? 'seat' : 'ticket'} ${formatUSD(entry.ticket.value)}`}
+              {entry.bounties > 0 && ` · bounties ${formatUSD(entry.bounties)}`}
+            </div>
+            <StatStrip stats={review.stats} />
+          </div>
+          <div className="card mt-3 p-3.5">
+            <Checks checks={review.checks} />
+          </div>
+        </Disclosure>
+        <Disclosure label="Every key hand" count={review.key_hands.length}>
+          <div className="space-y-2">
+            {review.key_hands.map((h) => (
+              <Hand key={h.hand_id} h={h} />
+            ))}
+          </div>
+        </Disclosure>
+      </div>
+      <p className="px-1 text-[11px] text-faint">
+        The grade is your decision accuracy: right or close scores 100, a mistake costing under 8% of your stack 70,
+        under 20% 40, more 0, averaged over the decisions that mattered. Luck counts only all-ins that reached a
+        showdown, against the cards shown. Judged against what this player pool does; estimates, not exact.
+      </p>
+    </div>
+  )
+}
+
+/** A folded section: a row to tap, its content below when open. */
+function Disclosure({ label, count, children }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between px-4 py-3.5 text-left text-[15px] active:bg-surface-2"
+      >
+        <span>{label}</span>
+        <span className="num text-sm text-faint">
+          {count ?? ''} {open ? '▴' : '▾'}
+        </span>
+      </button>
+      {open && <div className="px-3 pb-4">{children}</div>}
+    </div>
+  )
+}
+
+/** The review as it was before the recap: everything on one page. */
+function FullReview({ review, entry }) {
+  return (
         <div className="space-y-4">
           <div className="card-hero p-4">
             <div className="flex items-baseline justify-between">
@@ -408,8 +509,6 @@ export function Review({ review, entry, onClose }) {
               : 'Key hands show what happened, not whether it was right.'}
           </p>
         </div>
-      </div>
-    </div>
   )
 }
 
