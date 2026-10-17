@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom'
 import Cards from '../components/Cards.jsx'
 import { Badge } from '../components/ui.jsx'
 import { FORMAT_LABELS, formatSignedUSD, formatUSD, outcomeLabel } from '../lib/online.js'
-import { withSteals } from '../lib/grades.js'
+import { bb, withSteals } from '../lib/grades.js'
+import { costliestText, GROUP_LABELS, headline, shares } from '../lib/scorecard.js'
 import { formatDay } from '../lib/time.js'
 import { BBGradeRow } from './OnlineBBDefence.jsx'
 import { FlopGradeRow } from './OnlineFlop.jsx'
@@ -80,6 +81,16 @@ function Day({ day, byId, onOpen }) {
         <StatStrip stats={day.stats} />
       </div>
 
+      {day.scorecard && (
+        <Scorecard
+          sc={day.scorecard}
+          onCostliest={() => {
+            const r = day.tournaments.find((t) => t.id === day.scorecard.costliest?.tournament_id)
+            if (r && byId[r.id]) onOpen(r)
+          }}
+        />
+      )}
+
       <button
         type="button"
         onClick={() => setShowChecks((v) => !v)}
@@ -149,6 +160,82 @@ function StatStrip({ stats }) {
           <div className="text-sm font-semibold">{v}</div>
         </div>
       ))}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Scorecard: the day's graded decisions, added up
+// ---------------------------------------------------------------------------
+
+/**
+ * Every grade the day's tournaments carry, in one block: the headline, a
+ * correct / close / mistake bar, the costliest mistake (tap: its tournament)
+ * and, folded, the count per kind of decision.
+ */
+function Scorecard({ sc, onCostliest }) {
+  const [open, setOpen] = useState(false)
+  const h = headline(sc)
+  const s = shares(sc)
+  const c = sc.costliest
+  return (
+    <div className="border-t border-white/5 px-4 py-3">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-baseline justify-between gap-3 text-left"
+      >
+        <span className="text-sm font-semibold">Decisions</span>
+        <span className="num text-xs text-muted">
+          {h.counts}
+          {h.cost && <span className="ml-1.5 font-semibold text-loss">{h.cost}</span>} {open ? '▴' : '▾'}
+        </span>
+      </button>
+      <div className="mt-2 flex h-1.5 overflow-hidden rounded-full bg-surface-2" aria-hidden="true">
+        <div className="bg-gain" style={{ width: `${s.correct}%` }} />
+        <div className="bg-muted/50" style={{ width: `${s.close}%` }} />
+        <div className="bg-loss" style={{ width: `${s.mistake}%` }} />
+      </div>
+      <div className="num mt-1 flex justify-between text-[11px] text-faint">
+        <span>{sc.correct} right</span>
+        <span>{sc.close} close</span>
+        <span>{sc.mistakes} mistakes</span>
+      </div>
+
+      {c && (
+        <button type="button" onClick={onCostliest} className="mt-2.5 flex w-full items-center gap-2.5 rounded-xl bg-surface-2 p-2.5 text-left active:opacity-80">
+          <Cards cards={c.cards} small />
+          <span className="min-w-0 flex-1 text-[12.5px] leading-snug">
+            <span className="block text-[10px] font-semibold uppercase tracking-wide text-faint">Costliest</span>
+            {costliestText(c)}
+          </span>
+          <span className="num shrink-0 text-[13px] font-semibold text-loss">
+            {c.group === 'steal' ? '≥' : ''}
+            {bb(-c.cost_bb)}
+          </span>
+          <span className="text-faint" aria-hidden="true">›</span>
+        </button>
+      )}
+
+      {open && (
+        <div className="mt-2.5 divide-y divide-white/5 text-[13px]">
+          {sc.groups.map((g) => (
+            <div key={g.group} className="flex items-baseline justify-between gap-3 py-1.5">
+              <span className="text-muted">{GROUP_LABELS[g.group] || g.group}</span>
+              <span className="num">
+                {g.group === 'steal' ? `${g.mistakes} missed` : `${g.mistakes} / ${g.graded}`}
+                <span className={`ml-2 inline-block w-16 text-right ${g.mistakes ? 'text-loss' : 'text-faint'}`}>
+                  {g.mistakes ? `${g.group === 'steal' ? '≥' : ''}${bb(-g.cost_bb)}` : '—'}
+                </span>
+              </span>
+            </div>
+          ))}
+          <p className="pt-2 text-[11px] text-faint">
+            Mistakes / graded, and what the better play was worth. Graded against what this pool does; estimates, not exact.
+          </p>
+        </div>
+      )}
     </div>
   )
 }
