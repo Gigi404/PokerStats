@@ -100,6 +100,13 @@ export function whyLines(d) {
   if (rejam) lines.push(rejam)
 
   const notes = []
+  // A "close" that is close only because of the measured margin: say so,
+  // or "+0.8bb … close" reads like a contradiction.
+  if (d.verdict === 'close' && d.ev_bb > 0 && d.margin_bb > 0.3) {
+    notes.push(
+      `At this stack the model has overrated all-ins by about ${fmt(d.margin_bb)}bb, measured against what really happened — so an edge under that counts as close.`,
+    )
+  }
   if (w.sample) notes.push(`Based on ${w.sample.toLocaleString('en-CA')} similar spots in this player pool.`)
   for (const f of d.flags || []) if (FLAG_TEXT[f]) notes.push(FLAG_TEXT[f])
   return { lines, conclusion, notes }

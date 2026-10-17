@@ -123,3 +123,12 @@ describe('re-jam line', () => {
     expect(rejamLine({ rejam_pct: 60 })).toContain('60% of the time')
   })
 })
+
+describe('measured margin', () => {
+  it('explains a close grade that is close only because of the margin', () => {
+    const d = { ...missedShove, verdict: 'close', ev_bb: 0.8, cost_bb: 0, margin_bb: 0.94 }
+    expect(whyLines(d).notes[0]).toMatch(/overrated all-ins by about 0\.9bb/)
+    expect(whyLines({ ...d, margin_bb: 0.3 }).notes[0]).toMatch(/^Based on/)
+    expect(whyLines({ ...d, margin_bb: undefined }).notes[0]).toMatch(/^Based on/)
+  })
+})
