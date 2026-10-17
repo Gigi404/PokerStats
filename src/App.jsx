@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import BottomNav from './components/BottomNav.jsx'
 import Logo from './components/Logo.jsx'
+import ReviewSheet from './components/ReviewSheet.jsx'
 import useSessions from './hooks/useSessions.js'
 import * as repo from './lib/repo.js'
 import { newSession, startSession } from './lib/sessions.js'
@@ -27,6 +28,19 @@ export default function App() {
     setTab(id)
     setMoreView(null)
   }
+  // Review notes (2026-10-17): a sheet over any screen, from a floating
+  // button (hideable) or from More.
+  const [reviewOpen, setReviewOpen] = useState(false)
+  const [reviewHidden, setReviewHidden] = useState(false)
+  useEffect(() => {
+    repo.getMeta('reviewButtonHidden').then((v) => setReviewHidden(!!v)).catch(() => {})
+  }, [])
+  const toggleReviewButton = () => {
+    const next = !reviewHidden
+    setReviewHidden(next)
+    repo.setMeta('reviewButtonHidden', next).catch(() => {})
+  }
+  const openMore = (id) => (id === 'review' ? setReviewOpen(true) : setMoreView(id))
   const [editing, setEditing] = useState(null) // { session, mode } while the form is open
   const [lastBackup, setLastBackup] = useState(null)
   const [installed] = useState(isInstalled)
@@ -119,9 +133,21 @@ export default function App() {
         ) : moreView === 'backup' ? (
           <Backup sessions={sessions} lastBackup={lastBackup} onBackedUp={markBackedUp} onRestored={reload} />
         ) : (
-          <More backupDue={backupDue} onOpen={setMoreView} />
+          <More backupDue={backupDue} onOpen={openMore} />
         )}
       </main>
+
+      {!reviewHidden && !editing && (
+        <button
+          type="button"
+          onClick={() => setReviewOpen(true)}
+          className="fixed right-4 z-20 rounded-full border border-accent/40 bg-surface/95 px-3.5 py-2 text-[13px] font-semibold text-accent shadow-lg backdrop-blur"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom) + 84px)' }}
+        >
+          ✎ Review
+        </button>
+      )}
+      {reviewOpen && <ReviewSheet onClose={() => setReviewOpen(false)} onHideButton={toggleReviewButton} buttonHidden={reviewHidden} />}
 
       <BottomNav tab={tab} onChange={openTab} />
 

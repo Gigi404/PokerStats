@@ -8,6 +8,7 @@
 const ROWS = [
   { id: 'playground', label: 'Playground', hint: 'Jackpots, series, the schedule and promotions' },
   { id: 'backup', label: 'Backup', hint: 'Save or restore your live sessions' },
+  { id: 'review', label: 'Review notes', hint: 'What to look for, and your notes on the app' },
 ]
 
 export default function More({ backupDue, onOpen }) {
