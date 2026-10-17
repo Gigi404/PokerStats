@@ -6,8 +6,10 @@ import * as repo from './lib/repo.js'
 import { newSession, startSession } from './lib/sessions.js'
 import { isInstalled } from './lib/storage.js'
 import Backup from './screens/Backup.jsx'
+import More from './screens/More.jsx'
 import Online from './screens/Online.jsx'
 import Playground from './screens/Playground.jsx'
+import Puzzles from './screens/Puzzles.jsx'
 import SessionForm from './screens/SessionForm.jsx'
 import Sessions from './screens/Sessions.jsx'
 import Stats from './screens/Stats.jsx'
@@ -19,6 +21,12 @@ const BACKUP_EVERY = 10
 export default function App() {
   const { sessions, status, error, save, remove, reload } = useSessions()
   const [tab, setTab] = useState('sessions')
+  // Under More: null (the list), 'playground' or 'backup'.
+  const [moreView, setMoreView] = useState(null)
+  const openTab = (id) => {
+    setTab(id)
+    setMoreView(null)
+  }
   const [editing, setEditing] = useState(null) // { session, mode } while the form is open
   const [lastBackup, setLastBackup] = useState(null)
   const [installed] = useState(isInstalled)
@@ -70,14 +78,21 @@ export default function App() {
       <header className="pt-safe mx-auto max-w-lg px-4">
         <div className="flex items-center gap-2.5 pt-4 pb-4">
           <Logo className="h-8 w-8" />
+          {tab === 'more' && moreView && (
+            <button type="button" onClick={() => setMoreView(null)} className="text-accent" aria-label="Back to More">
+              ‹
+            </button>
+          )}
           <h1 className="text-[26px] font-bold tracking-tight">
-            {{ sessions: 'PokerStats', online: 'Online', playground: 'Playground', stats: 'Stats', more: 'Backup' }[tab]}
+            {tab === 'more'
+              ? { playground: 'Playground', backup: 'Backup' }[moreView] || 'More'
+              : { sessions: 'PokerStats', online: 'Online', puzzles: 'Puzzles', stats: 'Stats' }[tab]}
           </h1>
         </div>
       </header>
 
       {/* Keyed by tab so each switch replays the fade-up. */}
-      <main key={tab} className="fade-up mx-auto max-w-lg px-4 pb-28">
+      <main key={`${tab}-${moreView}`} className="fade-up mx-auto max-w-lg px-4 pb-28">
         {status === 'loading' ? null : tab === 'sessions' ? (
           <Sessions
             sessions={sessions}
@@ -88,20 +103,27 @@ export default function App() {
             onOpen={(session) => setEditing({ session, mode: 'edit' })}
             onFinish={(session) => setEditing({ session, mode: 'finish' })}
             onRebuy={handleRebuy}
-            onBackup={() => setTab('more')}
+            onBackup={() => {
+              setTab('more')
+              setMoreView('backup')
+            }}
           />
         ) : tab === 'online' ? (
           <Online />
-        ) : tab === 'playground' ? (
-          <Playground />
+        ) : tab === 'puzzles' ? (
+          <Puzzles />
         ) : tab === 'stats' ? (
           <Stats sessions={sessions} />
-        ) : (
+        ) : moreView === 'playground' ? (
+          <Playground />
+        ) : moreView === 'backup' ? (
           <Backup sessions={sessions} lastBackup={lastBackup} onBackedUp={markBackedUp} onRestored={reload} />
+        ) : (
+          <More backupDue={backupDue} onOpen={setMoreView} />
         )}
       </main>
 
-      <BottomNav tab={tab} onChange={setTab} />
+      <BottomNav tab={tab} onChange={openTab} />
 
       {editing && (
         <SessionForm

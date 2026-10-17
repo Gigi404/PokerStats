@@ -113,7 +113,7 @@ export default function Online() {
 }
 
 /** First open on a phone: ask for the passphrase once. */
-function Unlock({ onUnlock, error }) {
+export function Unlock({ onUnlock, error }) {
   const [value, setValue] = useState('')
   const [busy, setBusy] = useState(false)
 

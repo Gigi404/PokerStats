@@ -5,9 +5,12 @@ const TABS = [
   { id: 'sessions', label: 'Sessions', icon: 'M4 6h16M4 12h16M4 18h10' },
   // Globe: results that arrive from PokerStars by themselves.
   { id: 'online', label: 'Online', icon: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3.6 9h16.8M3.6 15h16.8M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18' },
-  { id: 'playground', label: 'Playground', icon: 'M8 3v3m8-3v3M4 10h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z' },
+  // Puzzle piece: spots from your own hands (Phase 8).
+  { id: 'puzzles', label: 'Puzzles', icon: 'M4 7h4a2 2 0 1 1 4 0h4v4a2 2 0 1 1 0 4v4H4z' },
   { id: 'stats', label: 'Stats', icon: 'M4 19V9m6 10V5m6 14v-7m4 7H3' },
-  { id: 'more', label: 'Backup', icon: 'M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2' },
+  // Playground and Backup live under More since 2026-10-17 (owner: try it,
+  // the tabs get reworked anyway).
+  { id: 'more', label: 'More', icon: 'M5 12h.01M12 12h.01M19 12h.01' },
 ]
 
 export default function BottomNav({ tab, onChange }) {
