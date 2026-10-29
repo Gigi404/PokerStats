@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import Cards from '../components/Cards.jsx'
+import Theory from '../components/Theory.jsx'
 import useOnline from '../hooks/useOnline.js'
 import * as repo from '../lib/repo.js'
 import { FORMAT_LABELS, formatUSD } from '../lib/online.js'
@@ -161,6 +162,7 @@ function Puzzle({ p, t, picked, onAnswer, onNext }) {
             ))}
           </div>
           <p className="text-[13px] text-faint">{e.table}</p>
+          <Theory key={p.id} lesson={p.lesson} decision={p.g} />
           <button type="button" onClick={onNext} className="min-h-12 w-full rounded-2xl border border-line font-semibold text-accent">
             Next puzzle ›
           </button>
