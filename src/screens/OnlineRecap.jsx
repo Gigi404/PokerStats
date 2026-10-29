@@ -1,4 +1,5 @@
 import Cards from '../components/Cards.jsx'
+import Theory from '../components/Theory.jsx'
 import { canReplay } from '../lib/replay.js'
 import { formatSignedUSD, outcomeLabel } from '../lib/online.js'
 import {
@@ -119,6 +120,7 @@ function WorkOn({ recap }) {
                 <div className="mt-1 flex items-center gap-1.5 text-[12px] text-faint">
                   Like <Cards cards={w.example.cards} small /> {exampleWhere(w.example)}
                 </div>
+                <Theory lesson={w.lesson} />
               </div>
             </div>
           )
