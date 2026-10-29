@@ -98,6 +98,12 @@ export const AREAS = [
     raise: 'Only time: it takes hundreds of tournaments per row.',
   },
   {
+    label: 'Tilt check',
+    confidence: 75,
+    evidence: 'Like-for-like test on 2,562 decisions: no tilt found. Blunders cluster, but in hard spots, not after blows. Both players are mixed in.',
+    raise: 'Who played each tournament (tilt is personal), and more nights.',
+  },
+  {
     label: 'Theory cards — the formulas',
     confidence: 99,
     evidence: 'Exact arithmetic (25% / 33% to call, minimum defence), tested.',
@@ -141,13 +147,13 @@ export const COVERED = [
   ['C-bets, folding to c-bets, check-raises', 'measured'],
   ['Bet sizing against this pool', 'measured'],
   ['The price of a bet and minimum defence', 'in the theory cards'],
+  ['Tilt after a bad beat, a big pot, a bust or a blunder', 'tested on the same kind of spots'],
 ]
 
 /** Theory not covered yet: [topic, why it matters, size]. */
 export const NOT_YET = [
   ['ICM: bubbles, pay jumps, final tables, satellite bubbles', 'The biggest gap — near the money, chips are not money, and a chip-right play can be a big mistake.', 'big'],
   ['Your own bets after the flop', 'Value bets, bluffs, c-bet sizing, barrels. Only facing a bet is graded today.', 'big'],
-  ['Tilt: how you play after a bad beat or a big loss', 'Cheap: the grades and timestamps to measure it already exist.', 'small'],
   ['Variance and sample size', 'How many tournaments before an ROI means anything; the risk of going broke at a given buy-in.', 'small'],
   ['Equity realisation from your own hands', 'Replaces the guess behind the after-the-flop grades.', 'medium'],
   ['Deep stacks preflop (over 40bb)', '3-bet bluffs, calling opens, set-mining: counted, not graded.', 'medium'],
