@@ -14,6 +14,7 @@ import Puzzles from './screens/Puzzles.jsx'
 import SessionForm from './screens/SessionForm.jsx'
 import Sessions from './screens/Sessions.jsx'
 import Stats from './screens/Stats.jsx'
+import Trust from './screens/Trust.jsx'
 
 // Nudge for a backup once this many sessions have been added or changed since
 // the last one. Small enough that a lost phone costs a couple of weeks, not a year.
@@ -22,7 +23,7 @@ const BACKUP_EVERY = 10
 export default function App() {
   const { sessions, status, error, save, remove, reload } = useSessions()
   const [tab, setTab] = useState('sessions')
-  // Under More: null (the list), 'playground' or 'backup'.
+  // Under More: null (the list), 'playground', 'backup' or 'trust'.
   const [moreView, setMoreView] = useState(null)
   const openTab = (id) => {
     setTab(id)
@@ -99,7 +100,7 @@ export default function App() {
           )}
           <h1 className="text-[26px] font-bold tracking-tight">
             {tab === 'more'
-              ? { playground: 'Playground', backup: 'Backup' }[moreView] || 'More'
+              ? { playground: 'Playground', backup: 'Backup', trust: 'How sure are we' }[moreView] || 'More'
               : { sessions: 'PokerStats', online: 'Online', puzzles: 'Puzzles', stats: 'Stats' }[tab]}
           </h1>
         </div>
@@ -132,6 +133,8 @@ export default function App() {
           <Playground />
         ) : moreView === 'backup' ? (
           <Backup sessions={sessions} lastBackup={lastBackup} onBackedUp={markBackedUp} onRestored={reload} />
+        ) : moreView === 'trust' ? (
+          <Trust />
         ) : (
           <More backupDue={backupDue} onOpen={openMore} />
         )}
