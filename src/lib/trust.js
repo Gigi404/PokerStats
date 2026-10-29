@@ -157,7 +157,7 @@ export const NOT_YET = [
   ['Variance and sample size', 'How many tournaments before an ROI means anything; the risk of going broke at a given buy-in.', 'small'],
   ['Equity realisation from your own hands', 'Replaces the guess behind the after-the-flop grades.', 'medium'],
   ['Deep stacks preflop (over 40bb)', '3-bet bluffs, calling opens, set-mining: counted, not graded.', 'medium'],
-  ['Multiway pots and squeezes', 'Every grader assumes one opponent, or the others fold.', 'medium'],
+  ['Multiway pots after the flop', 'Counted Oct 29: ~365 flop spots, mostly deep — too few to grade yet. Short-stack squeezes are already graded as re-shoves.', 'medium'],
   ['Board texture, range advantage, blockers', 'Who the flop favours and which cards make a bluff work.', 'big'],
   ['Opponents calling for your bounty', 'Measured and parked until there are about twice as many PKO hands.', 'medium'],
   ['Player types and exploits', 'Planned with the HUD: most opponents are met once, so types beat names.', 'big'],
