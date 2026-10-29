@@ -25,6 +25,7 @@ import OpenRanges from './OnlineOpens.jsx'
 import OpenResponse from './OnlineOpenResponse.jsx'
 import Progress from './OnlineProgress.jsx'
 import Suits from './OnlineSuits.jsx'
+import Tilt from './OnlineTilt.jsx'
 import { ShortStack } from './OnlineGrades.jsx'
 import { Recent, Review } from './OnlineReview.jsx'
 import { formatDay } from '../lib/time.js'
@@ -485,6 +486,7 @@ function MyGame({ data }) {
     <>
       <Progress p={play.progress} />
       <Suits s={play.suits} />
+      <Tilt t={play.tilt} />
       <div className="card p-3.5">
         <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Your stats vs typical</div>
         <table className="num w-full table-fixed text-sm">

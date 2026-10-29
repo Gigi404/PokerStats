@@ -2,10 +2,14 @@
 
 <!-- BRIEF:START -->
 DO NOW
-🟡 review    | v0.21.0: open with signal, swipe closed, reopen (More → Backup
+🟡 review    | v0.25.0: open with signal, swipe closed, reopen (More → Backup
              | footer shows the version). Tap ✎ Review and go through the
              | checklist screen by screen, then "Share notes" into the next
              | session. Recap, replay, Puzzles and More are all unseen on a phone.
+🟡 new 10-29 | Also unseen on a phone: My game → "Which tournaments suit you"
+             | and "Tilt check"; "The idea behind it" under recap leaks and
+             | puzzle answers; More → "How sure are we". The 35-item review
+             | checklist does not list these yet.
 🟡 her phone | Her app gets the same update; her puzzle progress is her own.
 
 NEEDS YOUR CALL
@@ -13,6 +17,12 @@ NEEDS YOUR CALL
 🟡 memorable | Still open from 09-24: memorable hands for live sessions.
 
 CARRIED OVER — still open, still correct
+🟡 trust     | "How sure are we" is static (lib/trust.js, AS_OF): update it when a
+             | check runs or a gap closes — the bankroll row first, once the
+             | cashier balance is typed in.
+🟡 log       | This repo's session log still lives in CLAUDE.md (16k chars).
+             | 10-29 was logged in PokerEdge's docs/SESSION_LOG.md instead; moving
+             | this log to docs/SESSION_LOG.md needs the owner's OK.
 🟡 backup    | Her live sessions exist only on her phone: nudge one backup
              | (More → Backup → Save a backup → Files).
 🟡 iPhone    | The live session form's one-row date / arrived / left, unseen
@@ -26,6 +36,7 @@ SETTLED
 ✅ grade     | A review opens on the recap; the grade is decision accuracy, set
              | upstream. The app words it, judges nothing.
 ✅ replay    | Key hands only, not every hand.
+✅ split     | Me / Her / Both tags per tournament, on the phone — after the HUD.
 ✅ puzzles   | Progress lives on each phone (IndexedDB), not shared.
 ✅ live only  | the session form logs live poker only; online results arrive by
              | themselves on the Online tab. Old online sessions stay.
