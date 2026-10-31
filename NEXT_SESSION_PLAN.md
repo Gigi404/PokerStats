@@ -2,10 +2,10 @@
 
 <!-- BRIEF:START -->
 DO NOW
-🟡 new 10-31 | v0.29.0: My game → "How much is luck", "River choices", "Pay jumps", "Position after the
+🟡 new 10-31 | v0.30.0: My game → "How much is luck", "Do the grades hold up", "River choices", "Pay jumps", "Position after the
              | flop", "Work on: from the videos", and notes under theory cards. All
              | unseen on a phone and missing from the review checklist.
-🟡 review    | v0.29.0: open with signal, swipe closed, reopen (More → Backup
+🟡 review    | v0.30.0: open with signal, swipe closed, reopen (More → Backup
              | footer shows the version). Tap ✎ Review and go through the
              | checklist screen by screen, then "Share notes" into the next
              | session. Recap, replay, Puzzles and More are all unseen on a phone.

@@ -40,7 +40,7 @@ export const AREAS = [
     label: 'Big blind defence grades',
     confidence: 75,
     evidence: 'Built on the checked equity; the discount for playing out of position is an assumption.',
-    raise: 'Backtest your real big blind defends the way the all-ins were: predicted vs what happened.',
+    raise: 'More calls. Backtested Oct 31 on 72 unseen calls: predicted +0.75bb, real +1.12bb (±1.38).',
   },
   {
     label: 'After-the-flop grades',
@@ -165,7 +165,6 @@ export const GAINS = [
   ['Type in the cashier balance', 'Bankroll 30% → 95%, in ten seconds.'],
   ['ICM for bubble and pay-jump spots', 'Fixes the weakest grades exactly where mistakes cost the most money.'],
   ['A second-opinion check of after-the-flop grades', 'Lifts the 60% area the way your 10-hand check proved the preflop maths.'],
-  ['Backtest the big blind defends', 'Cheap: the all-in backtest already exists to copy.'],
   ['Who played each tournament', 'Every number becomes yours instead of a blend (after the HUD).'],
 ]
 
@@ -187,6 +186,8 @@ export const COVERED = [
   ['Your own river bets and checks', 'priced on this pool, outside the letter grade'],
   ['Pay jumps near and in the money', 'an ICM estimate beside each all-in'],
   ['Position after the flop', 'measured on heads-up flops'],
+  ['Variance and sample size', 'the ROI range and how fragile the balance is'],
+  ['Equity realisation from your own hands', 'checked against the graders’ assumption'],
   ['Board texture', 'labelled on graded hands, not used in the grade'],
 ]
 
@@ -194,8 +195,6 @@ export const COVERED = [
 export const NOT_YET = [
   ['ICM: bubbles, pay jumps, final tables, satellite bubbles', 'The biggest gap — near the money, chips are not money, and a chip-right play can be a big mistake.', 'big'],
   ['Your own bets after the flop', 'Value bets, bluffs, c-bet sizing, barrels. Only facing a bet is graded today.', 'big'],
-  ['Variance and sample size', 'How many tournaments before an ROI means anything; the risk of going broke at a given buy-in.', 'small'],
-  ['Equity realisation from your own hands', 'Replaces the guess behind the after-the-flop grades.', 'medium'],
   ['Deep stacks preflop (over 40bb)', '3-bet bluffs, calling opens, set-mining: counted, not graded.', 'medium'],
   ['Multiway pots after the flop', 'Counted Oct 29: ~365 flop spots, mostly deep — too few to grade yet. Short-stack squeezes are already graded as re-shoves.', 'medium'],
   ['Board texture, range advantage, blockers', 'Who the flop favours and which cards make a bluff work.', 'big'],
