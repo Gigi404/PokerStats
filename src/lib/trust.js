@@ -104,6 +104,18 @@ export const AREAS = [
     raise: 'Who played each tournament (tilt is personal), and more nights.',
   },
   {
+    label: 'River choices — missed value and bad bets',
+    confidence: 60,
+    evidence: 'Fitted on 1,602 river bets, with mucked hands counted as losers. On unseen hands, predicted about 2–3bb per choice above real results, so bb totals are upper estimates. Spots where you act first are estimates too.',
+    raise: 'More river showdowns, and a check by a strong player of the costliest spots.',
+  },
+  {
+    label: 'River bluffs to consider',
+    confidence: 25,
+    evidence: 'Never counted as mistakes. Fold rates come from bets players chose to make, and a bet you never made can’t be checked.',
+    raise: 'Try some of these spots and let the results build up.',
+  },
+  {
     label: 'Theory cards — the formulas',
     confidence: 99,
     evidence: 'Exact arithmetic (25% / 33% to call, minimum defence), tested.',
@@ -148,6 +160,7 @@ export const COVERED = [
   ['Bet sizing against this pool', 'measured'],
   ['The price of a bet and minimum defence', 'in the theory cards'],
   ['Tilt after a bad beat, a big pot, a bust or a blunder', 'tested on the same kind of spots'],
+  ['Your own river bets and checks', 'priced on this pool, outside the letter grade'],
 ]
 
 /** Theory not covered yet: [topic, why it matters, size]. */
