@@ -1,5 +1,6 @@
 import Cards from '../components/Cards.jsx'
 import Theory from '../components/Theory.jsx'
+import usePractise from '../hooks/usePractise.js'
 import { canReplay } from '../lib/replay.js'
 import { formatSignedUSD, outcomeLabel } from '../lib/online.js'
 import {
@@ -102,7 +103,10 @@ function GradeCard({ recap, entry, luck }) {
 }
 
 function WorkOn({ recap }) {
+  const practise = usePractise()
   if (!recap.work_on.length && !recap.keep) return null
+  const lessons = recap.work_on.map((w) => w.lesson)
+  const puzzles = practise?.count(lessons) || 0
   return (
     <div>
       <div className={`${title} px-1`}>Work on</div>
@@ -139,6 +143,11 @@ function WorkOn({ recap }) {
           </div>
         )}
       </div>
+      {puzzles > 0 && (
+        <button type="button" onClick={() => practise.start(lessons)} className="btn-gold mt-2.5 min-h-11 w-full rounded-2xl text-[14px] font-semibold">
+          Practise these · {puzzles} puzzle{puzzles === 1 ? '' : 's'}
+        </button>
+      )}
     </div>
   )
 }

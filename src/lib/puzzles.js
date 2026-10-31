@@ -33,6 +33,16 @@ export const FILTERS = [
 /** The area a puzzle trains: the leak key without the answer ('shove', 'call', 'postflop', …). */
 export const area = (p) => p.lesson.split(':')[0]
 
+/**
+ * A filter for "Practise these": the areas of the given leaks. By area, not
+ * by exact leak, so the bank's clearly right decisions come along and the
+ * answer is never simply "the other one".
+ */
+export function focusFilter(lessons) {
+  const areas = new Set(lessons.map((lesson) => area({ lesson })))
+  return { key: 'focus', label: 'Your practice', test: (p) => areas.has(area(p)) }
+}
+
 const STREET = { flop: 'Flop', turn: 'Turn', river: 'River' }
 
 /**
@@ -122,12 +132,12 @@ function hash(s) {
 }
 
 /**
- * The next puzzle under a filter: anything due (oldest first), else an
+ * The next puzzle under a filter (a FILTERS key, or a focusFilter): anything due (oldest first), else an
  * unseen one from the costliest area, else the one due soonest. Never the
  * puzzle just answered when another exists.
  */
 export function nextPuzzle(items, progress, filterKey, now, lastId = null) {
-  const filter = FILTERS.find((f) => f.key === filterKey) || FILTERS[0]
+  const filter = typeof filterKey === 'object' ? filterKey : FILTERS.find((f) => f.key === filterKey) || FILTERS[0]
   const pool = items.filter(filter.test)
   if (!pool.length) return null
   const notLast = pool.filter((p) => p.id !== lastId)
