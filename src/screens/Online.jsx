@@ -28,6 +28,8 @@ import Suits from './OnlineSuits.jsx'
 import Tilt from './OnlineTilt.jsx'
 import RiverChoice from './OnlineRiverChoice.jsx'
 import PayJumps from './OnlinePayJumps.jsx'
+import Position from './OnlinePosition.jsx'
+import Study from './OnlineStudy.jsx'
 import { ShortStack } from './OnlineGrades.jsx'
 import { Recent, Review } from './OnlineReview.jsx'
 import { formatDay } from '../lib/time.js'
@@ -491,6 +493,8 @@ function MyGame({ data }) {
       <Tilt t={play.tilt} />
       <RiverChoice r={play.river_choice} />
       <PayJumps i={play.icm} />
+      <Position p={play.position} />
+      <Study />
       <div className="card p-3.5">
         <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Your stats vs typical</div>
         <table className="num w-full table-fixed text-sm">

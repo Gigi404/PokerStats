@@ -122,6 +122,18 @@ export const AREAS = [
     raise: 'More deep runs, and better estimates of players left.',
   },
   {
+    label: 'Position after the flop',
+    confidence: 55,
+    evidence: 'Results measured on every heads-up flop, with standard errors. It shows what happened, not why: judging a line by position would need a solver.',
+    raise: 'More hands, and who played each tournament.',
+  },
+  {
+    label: 'Study notes from coaching videos',
+    confidence: 30,
+    evidence: 'A coach’s opinion, kept beside the theory cards. Only the findings marked as tested were checked on hands, and those carry showdown bias.',
+    raise: 'A strong player reading them against your own spots.',
+  },
+  {
     label: 'Theory cards — the formulas',
     confidence: 99,
     evidence: 'Exact arithmetic (25% / 33% to call, minimum defence), tested.',
@@ -168,6 +180,8 @@ export const COVERED = [
   ['Tilt after a bad beat, a big pot, a bust or a blunder', 'tested on the same kind of spots'],
   ['Your own river bets and checks', 'priced on this pool, outside the letter grade'],
   ['Pay jumps near and in the money', 'an ICM estimate beside each all-in'],
+  ['Position after the flop', 'measured on heads-up flops'],
+  ['Board texture', 'labelled on graded hands, not used in the grade'],
 ]
 
 /** Theory not covered yet: [topic, why it matters, size]. */

@@ -68,7 +68,8 @@ export function flopVerdict(g) {
 /** The short line under the cards: the spot in words. */
 export function flopSpot(g) {
   const where = SITUATION[g.situation] || ''
-  return `${g.bet_pct}% pot bet · SPR ${g.spr} · ${where}`
+  const board = g.texture ? ` · ${g.texture} board` : ''
+  return `${g.bet_pct}% pot bet · SPR ${g.spr} · ${where}${board}`
 }
 
 /**
