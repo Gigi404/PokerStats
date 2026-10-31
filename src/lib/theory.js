@@ -13,6 +13,8 @@
   with the graders, which compute it against this pool.
 */
 
+import { studyNotes } from './study.js'
+
 const pct = (x) => `${Math.round(x)}%`
 const bb = (x) => `${Math.round(x * 10) / 10}bb`
 const has = (...xs) => xs.every((x) => x !== null && x !== undefined && Number.isFinite(Number(x)))
@@ -198,7 +200,7 @@ export function theory(lesson, decision) {
       worked = null
     }
   }
-  return { idea: t.idea, points: t.points, worked }
+  return { idea: t.idea, points: t.points, worked, notes: studyNotes(lesson) }
 }
 
 /** Every leak key with a card (for tests and coverage). */

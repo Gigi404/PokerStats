@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Segmented } from '../components/ui.jsx'
 import { FlopGradeRow } from './OnlineFlop.jsx'
+import { textureLine } from '../lib/position.js'
 
 /*
   Postflop decisions, from PokerEdge's core/postflop.py (play.postflop): your
@@ -19,6 +20,7 @@ const LABEL = { flop: 'Flop', turn: 'Turn', river: 'River' }
 export default function Postflop({ p }) {
   const [game, setGame] = useState('tournament')
   const [open, setOpen] = useState(null)
+  const texture = textureLine(p.flop_texture?.[game])
   if (!p || !p.streets) return null
   const streets = p.streets.filter((s) => p[s])
   return (
@@ -82,6 +84,7 @@ export default function Postflop({ p }) {
       </div>
       <p className="mt-2 text-[11px] text-faint">
         Multiway pots (someone called before you) are not graded. Estimates against this pool, not solver answers.
+        {texture && ` Flop mistakes by board: ${texture}.`}
       </p>
     </div>
   )
