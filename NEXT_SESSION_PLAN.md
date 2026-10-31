@@ -2,7 +2,9 @@
 
 <!-- BRIEF:START -->
 DO NOW
-🟡 review    | v0.25.0: open with signal, swipe closed, reopen (More → Backup
+🟡 new 10-31 | v0.27.0: My game → "River choices" and "Pay jumps", both unseen on
+             | a phone and missing from the review checklist.
+🟡 review    | v0.27.0: open with signal, swipe closed, reopen (More → Backup
              | footer shows the version). Tap ✎ Review and go through the
              | checklist screen by screen, then "Share notes" into the next
              | session. Recap, replay, Puzzles and More are all unseen on a phone.
