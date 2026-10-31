@@ -116,6 +116,12 @@ export const AREAS = [
     raise: 'Try some of these spots and let the results build up.',
   },
   {
+    label: 'Pay jumps — ICM notes',
+    confidence: 35,
+    evidence: 'An estimate beside the grade, never a grade. Prizes come from a curve fitted on six real tables, players left are interpolated, and other tables’ stacks are assumed average. Only 8 tournaments so far, 6 of them bounty events, where ICM says less. Not yet checked in an ICM tool.',
+    raise: 'More deep runs, and a few spots checked in ICMIZER.',
+  },
+  {
     label: 'Theory cards — the formulas',
     confidence: 99,
     evidence: 'Exact arithmetic (25% / 33% to call, minimum defence), tested.',
@@ -161,6 +167,7 @@ export const COVERED = [
   ['The price of a bet and minimum defence', 'in the theory cards'],
   ['Tilt after a bad beat, a big pot, a bust or a blunder', 'tested on the same kind of spots'],
   ['Your own river bets and checks', 'priced on this pool, outside the letter grade'],
+  ['Pay jumps near and in the money', 'an ICM estimate beside each all-in'],
 ]
 
 /** Theory not covered yet: [topic, why it matters, size]. */
