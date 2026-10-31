@@ -10,7 +10,7 @@
   file when a check is run or a gap closes.
 */
 
-export const AS_OF = '2026-10-29'
+export const AS_OF = '2026-10-31'
 
 /**
  * Each area: label, confidence (0-100, a judgement), evidence, raise (how to
@@ -118,8 +118,8 @@ export const AREAS = [
   {
     label: 'Pay jumps — ICM notes',
     confidence: 35,
-    evidence: 'An estimate beside the grade, never a grade. Prizes come from a curve fitted on six real tables, players left are interpolated, and other tables’ stacks are assumed average. Only 8 tournaments so far, 6 of them bounty events, where ICM says less. Not yet checked in an ICM tool.',
-    raise: 'More deep runs, and a few spots checked in ICMIZER.',
+    evidence: 'An estimate beside the grade, never a grade. Prizes come from a curve fitted on six real tables, players left are interpolated, and other tables’ stacks are assumed average. Only 8 tournaments so far, 6 of them bounty events, where ICM says less. The calculator itself matched HoldemResources to two decimals.',
+    raise: 'More deep runs, and better estimates of players left.',
   },
   {
     label: 'Theory cards — the formulas',
