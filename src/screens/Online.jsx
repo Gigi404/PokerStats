@@ -30,6 +30,7 @@ import RiverChoice from './OnlineRiverChoice.jsx'
 import PayJumps from './OnlinePayJumps.jsx'
 import Position from './OnlinePosition.jsx'
 import Study from './OnlineStudy.jsx'
+import Variance from './OnlineVariance.jsx'
 import { ShortStack } from './OnlineGrades.jsx'
 import { Recent, Review } from './OnlineReview.jsx'
 import { formatDay } from '../lib/time.js'
@@ -488,6 +489,7 @@ function MyGame({ data }) {
   const colWidth = split ? 'w-[4.5rem]' : 'w-24'
   return (
     <>
+      <Variance v={play.variance} />
       <Progress p={play.progress} />
       <Suits s={play.suits} />
       <Tilt t={play.tilt} />

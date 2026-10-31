@@ -122,6 +122,12 @@ export const AREAS = [
     raise: 'More deep runs, and better estimates of players left.',
   },
   {
+    label: 'How much is luck — ROI range and balance risk',
+    confidence: 60,
+    evidence: 'Your own results, reshuffled. Sound arithmetic, but it assumes the future looks like the past, and two players are mixed in.',
+    raise: 'More tournaments, and who played each one.',
+  },
+  {
     label: 'Position after the flop',
     confidence: 55,
     evidence: 'Results measured on every heads-up flop, with standard errors. It shows what happened, not why: judging a line by position would need a solver.',
