@@ -3,6 +3,7 @@
   they only make sense together.
 */
 
+import { useState } from 'react'
 import { formatSigned } from '../lib/money.js'
 
 /**
@@ -32,6 +33,31 @@ export function Segmented({ options, value, onChange, size = 'md' }) {
           </button>
         )
       })}
+    </div>
+  )
+}
+
+/**
+ * A heading that opens to its content, closed by default. The content only
+ * mounts when open, so a folded page costs nothing to render.
+ *
+ * @param {{title: React.ReactNode, hint?: string, plain?: boolean, children: React.ReactNode}} props
+ *   plain: no card of its own, for a fold inside a card.
+ */
+export function Fold({ title, hint, plain = false, children }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={plain ? 'py-2' : 'card px-3.5 py-1'}>
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex min-h-11 w-full items-center justify-between gap-3 text-left">
+        <span className="min-w-0">
+          {typeof title === 'string' ? <span className="block text-[15px] font-semibold">{title}</span> : title}
+          {hint && <span className="block text-[12px] text-faint">{hint}</span>}
+        </span>
+        <span className="shrink-0 text-sm text-faint" aria-hidden="true">
+          {open ? '▴' : '▾'}
+        </span>
+      </button>
+      {open && <div className="pt-2 pb-2">{children}</div>}
     </div>
   )
 }

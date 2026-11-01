@@ -4,7 +4,7 @@ import Theory from '../components/Theory.jsx'
 import useOnline from '../hooks/useOnline.js'
 import * as repo from '../lib/repo.js'
 import { FORMAT_LABELS, formatUSD } from '../lib/online.js'
-import { explain, FILTERS, nextPuzzle, question, record, remaining, today } from '../lib/puzzles.js'
+import { explain, FILTERS, focusFilter, nextPuzzle, question, record, remaining, today } from '../lib/puzzles.js'
 import { formatDay } from '../lib/time.js'
 import { Unlock } from './Online.jsx'
 
@@ -20,10 +20,11 @@ import { Unlock } from './Online.jsx'
 
 const META_KEY = 'puzzles'
 
-export default function Puzzles() {
+/** @param {{focus?: string[] | null}} props  focus: leaks sent here by a "Practise" button. */
+export default function Puzzles({ focus = null }) {
   const online = useOnline()
   const [progress, setProgress] = useState(null)
-  const [filter, setFilter] = useState('leaks')
+  const [filter, setFilter] = useState(focus ? 'focus' : 'leaks')
   // The puzzle on screen, once chosen; while null, the next one is derived.
   const [currentId, setCurrentId] = useState(null)
   const [picked, setPicked] = useState(null)
@@ -49,9 +50,12 @@ export default function Puzzles() {
     return <div className="card p-5 text-sm text-muted">No puzzles yet: they arrive with the next results PokerEdge sends.</div>
   }
 
-  const current = items.find((p) => p.id === currentId) || nextPuzzle(items, progress, filter, now)
+  const practice = focus ? focusFilter(focus) : null
+  const chips = practice ? [practice, ...FILTERS] : FILTERS
+  const active = filter === 'focus' ? practice : filter
+  const current = items.find((p) => p.id === currentId) || nextPuzzle(items, progress, active, now)
   const t = today(progress, now)
-  const left = remaining(items, progress, now)
+  const left = remaining(filter === 'focus' ? items.filter(practice.test) : items, progress, now)
 
   const answer = async (value) => {
     const at = Date.now()
@@ -70,7 +74,7 @@ export default function Puzzles() {
     const at = Date.now()
     setPicked(null)
     setNow(at)
-    setCurrentId(nextPuzzle(items, progress, filter, at, current.id)?.id ?? null)
+    setCurrentId(nextPuzzle(items, progress, active, at, current.id)?.id ?? null)
   }
 
   return (
@@ -78,7 +82,7 @@ export default function Puzzles() {
       <p className="px-1 text-sm text-muted">Spots from your own tournaments. A mistake comes back until you get it right.</p>
 
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-        {FILTERS.map((f) => (
+        {chips.map((f) => (
           <button
             key={f.key}
             type="button"

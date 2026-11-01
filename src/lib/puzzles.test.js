@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { explain, nextPuzzle, question, record, REDO_MIN, remaining, today } from './puzzles.js'
+import { explain, focusFilter, nextPuzzle, question, record, REDO_MIN, remaining, today } from './puzzles.js'
 
 const NOW = new Date('2026-10-17T20:00:00').getTime()
 
@@ -69,5 +69,19 @@ describe('scheduling', () => {
     expect(today(p, NOW)).toEqual({ answered: 2, right: 1 })
     const items = [shove('a', 'mistake', 'shove', 1), shove('b', 'mistake', 'shove', 1), shove('c', 'mistake', 'shove', 1), shove('d', 'correct', 'fold')]
     expect(remaining(items, p, NOW + REDO_MIN * 60000)).toBe(2) // b is due again, c unseen; a put away, d a right one
+  })
+})
+
+describe('focusFilter', () => {
+  it('keeps the whole area of a leak, both directions and clear rights', () => {
+    const f = focusFilter(['bb:defend'])
+    expect(f.test({ lesson: 'bb:fold' })).toBe(true)
+    expect(f.test({ lesson: 'call:call' })).toBe(false)
+  })
+
+  it('can be handed to nextPuzzle in place of a filter key', () => {
+    const p = { id: 'a', lesson: 'bb:defend', group: 'bb', g: { verdict: 'mistake', cost_bb: 1 } }
+    const q = { id: 'b', lesson: 'call:call', group: 'short_stack', g: { verdict: 'mistake', cost_bb: 9 } }
+    expect(nextPuzzle([q, p], {}, focusFilter(['bb:defend']), 0).id).toBe('a')
   })
 })

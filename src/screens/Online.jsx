@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import ProfitChart from '../components/ProfitChart.jsx'
-import { Badge, Segmented, Tile, inputClass } from '../components/ui.jsx'
+import { Badge, Fold, Segmented, Tile, inputClass } from '../components/ui.jsx'
 import useOnline from '../hooks/useOnline.js'
+import { PractiseContext } from '../hooks/usePractise.js'
+import { TOPICS } from '../lib/leaks.js'
+import { focusFilter } from '../lib/puzzles.js'
 import {
   FORMAT_LABELS,
   band,
@@ -23,6 +26,7 @@ import Sizing from './OnlineSizing.jsx'
 import Postflop from './OnlinePostflop.jsx'
 import OpenRanges from './OnlineOpens.jsx'
 import OpenResponse from './OnlineOpenResponse.jsx'
+import Leaks from './OnlineLeaks.jsx'
 import Progress from './OnlineProgress.jsx'
 import Suits from './OnlineSuits.jsx'
 import Tilt from './OnlineTilt.jsx'
@@ -49,7 +53,7 @@ function USD({ value, className = '' }) {
  * PokerEdge after each session. Read-only: nothing here is a session, nothing
  * is typed in, and the amounts are USD, kept apart from the CAD live results.
  */
-export default function Online() {
+export default function Online({ onPractise }) {
   const online = useOnline()
   // Recent first: it is the "how did we play" view, the reason the tab exists.
   // Files published before the review existed have no recent_days — those
@@ -76,47 +80,54 @@ export default function Online() {
   const { data } = online
   const hasRecent = Array.isArray(data.recent_days)
   const current = view === 'recent' && !hasRecent ? 'overview' : view
+  const puzzles = data.play?.puzzles?.items || []
+  const practise = {
+    start: onPractise,
+    count: (lessons) => puzzles.filter(focusFilter(lessons).test).length,
+  }
   return (
-    <div className="space-y-4">
-      <Segmented
-        size="sm"
-        value={current}
-        onChange={setView}
-        options={[
-          ...(hasRecent ? [{ value: 'recent', label: 'Recent' }] : []),
-          { value: 'overview', label: 'Overview' },
-          { value: 'tournaments', label: 'History' },
-          { value: 'game', label: 'My game' },
-          // Files published before the bankroll existed have no `bankroll` key.
-          ...('bankroll' in data ? [{ value: 'goal', label: 'Goal' }] : []),
-          { value: 'charts', label: 'Charts' },
-        ]}
-      />
+    <PractiseContext.Provider value={practise}>
+      <div className="space-y-4">
+        <Segmented
+          size="sm"
+          value={current}
+          onChange={setView}
+          options={[
+            ...(hasRecent ? [{ value: 'recent', label: 'Recent' }] : []),
+            { value: 'overview', label: 'Overview' },
+            { value: 'tournaments', label: 'History' },
+            { value: 'game', label: 'My game' },
+            // Files published before the bankroll existed have no `bankroll` key.
+            ...('bankroll' in data ? [{ value: 'goal', label: 'Goal' }] : []),
+            { value: 'charts', label: 'Charts' },
+          ]}
+        />
 
-      {current === 'recent' ? (
-        <Recent days={data.recent_days} history={data.tournaments.history} />
-      ) : current === 'overview' ? (
-        <Overview data={data} />
-      ) : current === 'charts' ? (
-        <Charts rejam={data.play?.rejam} />
-      ) : current === 'goal' ? (
-        <Goal bankroll={data.bankroll} />
-      ) : current === 'tournaments' ? (
-        <History data={data} />
-      ) : (
-        <MyGame data={data} />
-      )}
+        {current === 'recent' ? (
+          <Recent days={data.recent_days} history={data.tournaments.history} />
+        ) : current === 'overview' ? (
+          <Overview data={data} />
+        ) : current === 'charts' ? (
+          <Charts rejam={data.play?.rejam} />
+        ) : current === 'goal' ? (
+          <Goal bankroll={data.bankroll} />
+        ) : current === 'tournaments' ? (
+          <History data={data} />
+        ) : (
+          <MyGame data={data} />
+        )}
 
-      <p className="px-1 text-center text-xs text-faint">
-        PokerStars · {data.meta.hero} · sent {ageLabel(online.publishedAt)}
-        <br />
-        Hands up to {formatDay(String(data.meta.data_through || '').slice(0, 10))} · amounts in US dollars
-        <br />
-        <button type="button" className="mt-2 text-faint underline" onClick={online.forget}>
-          Lock on this phone
-        </button>
-      </p>
-    </div>
+        <p className="px-1 text-center text-xs text-faint">
+          PokerStars · {data.meta.hero} · sent {ageLabel(online.publishedAt)}
+          <br />
+          Hands up to {formatDay(String(data.meta.data_through || '').slice(0, 10))} · amounts in US dollars
+          <br />
+          <button type="button" className="mt-2 text-faint underline" onClick={online.forget}>
+            Lock on this phone
+          </button>
+        </p>
+      </div>
+    </PractiseContext.Provider>
   )
 }
 
@@ -469,7 +480,59 @@ const STAT_ROWS = [
 const BAND_STYLE = { low: 'text-accent', high: 'text-accent', ok: 'text-gain' }
 const BAND_WORD = { low: '↓low', high: '↑high', ok: 'ok' }
 
+/**
+ * My game (Phase 8, density pass): the leaks ranked by what they cost, the one
+ * progress measure, then every older card folded by topic (lib/leaks.js).
+ */
 function MyGame({ data }) {
+  const { play, benchmarks } = data
+  const parts = {
+    stats: <StatsVsTypical data={data} />,
+    seats: <OpenBySeat open={play.open_by_seat} ranges={benchmarks.open_by_seat} />,
+    opens: <OpenRanges o={play.open_ranges} />,
+    response: <OpenResponse r={play.open_response} />,
+    depth: <ByStack rows={play.by_depth} />,
+    trends: <Trends trends={play.trends} ranges={benchmarks.open_by_seat} />,
+    short: <ShortStack s={play.short_stack} />,
+    deep: <DeepThreeBet d={play.deep_threebet} />,
+    bb: <BBDefence d={play.bb_defence} />,
+    flop: <FlopHabits f={play.flop} />,
+    post: <Postflop p={play.postflop} />,
+    sizing: <Sizing s={play.sizing} />,
+    river: <RiverChoice r={play.river_choice} />,
+    position: <Position p={play.position} />,
+    suits: <Suits s={play.suits} />,
+    tilt: <Tilt t={play.tilt} />,
+    pay: <PayJumps i={play.icm} />,
+    tickets: <Tickets tickets={data.tournaments.tickets} />,
+    variance: <Variance v={play.variance} />,
+    reality: <Reality r={play.reality} />,
+    study: <Study />,
+  }
+  return (
+    <>
+      <Leaks leaks={play.leaks} overall={play.progress?.overall} parts={parts} />
+      <Progress p={play.progress} />
+      <div>
+        <div className="mb-2 px-1 text-xs font-semibold uppercase tracking-[0.14em] text-faint">The numbers</div>
+        <div className="space-y-2">
+          {TOPICS.map((t) => (
+            <Fold key={t.key} title={t.title} hint={t.hint}>
+              <div className="space-y-4">
+                {t.parts.map((k) => (
+                  <Fragment key={k}>{parts[k]}</Fragment>
+                ))}
+              </div>
+            </Fold>
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
+/** Your stats against the typical ranges, tournaments split by table size. */
+function StatsVsTypical({ data }) {
   const { play, benchmarks } = data
   // Summaries since 2026-10-08 split tournament stats by table size: the
   // typical ranges describe full tables, so only those are judged, and
@@ -490,15 +553,6 @@ function MyGame({ data }) {
   const colWidth = split ? 'w-[4.5rem]' : 'w-24'
   return (
     <>
-      <Variance v={play.variance} />
-      <Progress p={play.progress} />
-      <Suits s={play.suits} />
-      <Tilt t={play.tilt} />
-      <RiverChoice r={play.river_choice} />
-      <PayJumps i={play.icm} />
-      <Position p={play.position} />
-      <Study />
-      <Reality r={play.reality} />
       <div className="card p-3.5">
         <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Your stats vs typical</div>
         <table className="num w-full table-fixed text-sm">
@@ -550,46 +604,37 @@ function MyGame({ data }) {
           {split && ' They describe full tables, so short-handed play is shown without a verdict — playing looser there is normal.'}
         </p>
       </div>
-
-      <OpenBySeat open={play.open_by_seat} ranges={benchmarks.open_by_seat} />
-      <OpenRanges o={play.open_ranges} />
-      <OpenResponse r={play.open_response} />
-
-      <div className="card p-3.5">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">By stack size · tournaments</div>
-        <table className="num w-full table-fixed text-sm">
-          <thead>
-            <tr className="text-left text-xs text-faint">
-              <th className="pb-1.5 font-medium">Stack</th>
-              <th className="pb-1.5 text-right font-medium">Hands</th>
-              <th className="pb-1.5 text-right font-medium">bb/100</th>
-              <th className="pb-1.5 text-right font-medium">Re-shove</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {play.by_depth.map((d) => (
-              <tr key={d.key}>
-                <td className="py-2">{d.label}</td>
-                <td className="py-2 text-right text-muted">{d.hands.toLocaleString('en-CA')}</td>
-                <td className={`py-2 text-right ${d.bb_per_100 >= 0 ? 'text-gain' : 'text-loss'}`}>{signed(d.bb_per_100)}</td>
-                <td className="py-2 text-right text-muted">{formatPct(d.reshove.pct)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p className="mt-2 text-[11px] text-faint">Re-shove: 3-bet or all-in when someone raised first, outside the big blind.</p>
-      </div>
-
-      <ShortStack s={play.short_stack} />
-      <DeepThreeBet d={play.deep_threebet} />
-      <BBDefence d={play.bb_defence} />
-      <FlopHabits f={play.flop} />
-      <Postflop p={play.postflop} />
-      <Sizing s={play.sizing} />
-
-      <Trends trends={play.trends} ranges={benchmarks.open_by_seat} />
-      <Tickets tickets={data.tournaments.tickets} />
     </>
+  )
+}
+
+/** Hands, win rate and re-shoves by stack depth. */
+function ByStack({ rows }) {
+  return (
+    <div className="card p-3.5">
+      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">By stack size · tournaments</div>
+      <table className="num w-full table-fixed text-sm">
+        <thead>
+          <tr className="text-left text-xs text-faint">
+            <th className="pb-1.5 font-medium">Stack</th>
+            <th className="pb-1.5 text-right font-medium">Hands</th>
+            <th className="pb-1.5 text-right font-medium">bb/100</th>
+            <th className="pb-1.5 text-right font-medium">Re-shove</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/5">
+          {rows.map((d) => (
+            <tr key={d.key}>
+              <td className="py-2">{d.label}</td>
+              <td className="py-2 text-right text-muted">{d.hands.toLocaleString('en-CA')}</td>
+              <td className={`py-2 text-right ${d.bb_per_100 >= 0 ? 'text-gain' : 'text-loss'}`}>{signed(d.bb_per_100)}</td>
+              <td className="py-2 text-right text-muted">{formatPct(d.reshove.pct)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="mt-2 text-[11px] text-faint">Re-shove: 3-bet or all-in when someone raised first, outside the big blind.</p>
+    </div>
   )
 }
 
@@ -651,7 +696,10 @@ function OpenBySeat({ open, ranges }) {
   )
 }
 
-/** The leaks being worked on, month by month. Thin months are faded. */
+/**
+ * Opening and re-shove rates, month by month. Thin months are faded. Detail
+ * now: Progress is the page's one measure of getting better.
+ */
 function Trends({ trends, ranges }) {
   const rows = trends.slice(-6).reverse()
   const cell = (o, range) => {
@@ -666,7 +714,7 @@ function Trends({ trends, ranges }) {
   }
   return (
     <div className="card p-3.5">
-      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Leaks to fix · by month</div>
+      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Opening rates · by month</div>
       <table className="num w-full table-fixed text-sm">
         <thead>
           <tr className="text-left text-xs text-faint">

@@ -25,9 +25,16 @@ export default function App() {
   const [tab, setTab] = useState('sessions')
   // Under More: null (the list), 'playground', 'backup' or 'trust'.
   const [moreView, setMoreView] = useState(null)
+  // Leaks a "Practise" button sent to the Puzzles tab; the tab bar clears them.
+  const [practice, setPractice] = useState(null)
   const openTab = (id) => {
     setTab(id)
     setMoreView(null)
+    setPractice(null)
+  }
+  const practise = (lessons) => {
+    setPractice(lessons)
+    setTab('puzzles')
   }
   // Review notes (2026-10-17): a sheet over any screen, from a floating
   // button (hideable) or from More.
@@ -124,9 +131,9 @@ export default function App() {
             }}
           />
         ) : tab === 'online' ? (
-          <Online />
+          <Online onPractise={practise} />
         ) : tab === 'puzzles' ? (
-          <Puzzles />
+          <Puzzles focus={practice} />
         ) : tab === 'stats' ? (
           <Stats sessions={sessions} />
         ) : moreView === 'playground' ? (

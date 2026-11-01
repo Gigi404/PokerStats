@@ -16,7 +16,7 @@ DO NOW
 🟡 her phone | Her app gets the same update; her puzzle progress is her own.
 
 NEEDS YOUR CALL
-🟡 next      | Step 5 (a less dense My game) waits on your review notes.
+🟡 next      | Step 5 built ahead of your review notes (v0.31.0): the notes now adjust it.
 🟡 memorable | Still open from 09-24: memorable hands for live sessions.
 
 CARRIED OVER — still open, still correct
@@ -30,8 +30,6 @@ CARRIED OVER — still open, still correct
              | (More → Backup → Save a backup → Files).
 🟡 iPhone    | The live session form's one-row date / arrived / left, unseen
              | on an iPhone (from v0.17.0).
-🟡 link      | The recap's "Practise these" button into Puzzles (in the mockup)
-             | is not built yet.
 
 SETTLED
 ✅ tabs      | Sessions · Online · Puzzles · Stats · More (Playground, Backup,
