@@ -2,16 +2,19 @@
 
 <!-- BRIEF:START -->
 DO NOW
+🟡 v0.31.0   | My game opens on your costliest leak, with Practise buttons into
+             | Puzzles; the recap has "Practise these". Checked at 390px in
+             | headless Chrome, not on a phone. In the review checklist.
 🟡 new 10-31 | v0.30.0: My game → "How much is luck", "Do the grades hold up", "River choices", "Pay jumps", "Position after the
              | flop", "Work on: from the videos", and notes under theory cards. All
              | unseen on a phone and missing from the review checklist.
-🟡 review    | v0.30.0: open with signal, swipe closed, reopen (More → Backup
+🟡 review    | v0.31.0: open with signal, swipe closed, reopen (More → Backup
              | footer shows the version). Tap ✎ Review and go through the
              | checklist screen by screen, then "Share notes" into the next
              | session. Recap, replay, Puzzles and More are all unseen on a phone.
 🟡 new 10-29 | Also unseen on a phone: My game → "Which tournaments suit you"
              | and "Tilt check"; "The idea behind it" under recap leaks and
-             | puzzle answers; More → "How sure are we". The 35-item review
+             | puzzle answers; More → "How sure are we". The 36-item review
              | checklist does not list these yet.
 🟡 her phone | Her app gets the same update; her puzzle progress is her own.
 
@@ -24,7 +27,7 @@ CARRIED OVER — still open, still correct
              | check runs or a gap closes — the bankroll row first, once the
              | cashier balance is typed in.
 🟡 log       | This repo's session log still lives in CLAUDE.md (16k chars).
-             | 10-29 was logged in PokerEdge's docs/SESSION_LOG.md instead; moving
+             | 10-29 and 10-31 were logged in PokerEdge's docs/SESSION_LOG.md; moving
              | this log to docs/SESSION_LOG.md needs the owner's OK.
 🟡 backup    | Her live sessions exist only on her phone: nudge one backup
              | (More → Backup → Save a backup → Files).
