@@ -2,6 +2,11 @@
 
 <!-- BRIEF:START -->
 DO NOW
+🟡 new 11-13 | Sessions: header is this month (live only), Cash and MTT side
+             | by side; same-day sessions share one calendar tile with the day
+             | total; MTT rows are blue. Live since 11-13 (f9fd97a), unseen on a
+             | phone. No version bump: the footer still says v0.31.0, so it
+             | cannot tell you which build you have.
 🟡 v0.31.0   | My game opens on your costliest leak, with Practise buttons into
              | Puzzles; the recap has "Practise these". Checked at 390px in
              | headless Chrome, not on a phone. In the review checklist.
@@ -27,7 +32,7 @@ CARRIED OVER — still open, still correct
              | check runs or a gap closes — the bankroll row first, once the
              | cashier balance is typed in.
 🟡 log       | This repo's session log still lives in CLAUDE.md (16k chars).
-             | 10-29 and 10-31 were logged in PokerEdge's docs/SESSION_LOG.md; moving
+             | 10-29, 10-31 and 11-13 were logged in PokerEdge's docs/SESSION_LOG.md; moving
              | this log to docs/SESSION_LOG.md needs the owner's OK.
 🟡 backup    | Her live sessions exist only on her phone: nudge one backup
              | (More → Backup → Save a backup → Files).
