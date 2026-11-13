@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { centsToInput, formatSigned, toCents } from './money.js'
 import { durationMinutes } from './time.js'
 import { newSession, profit, validate } from './sessions.js'
-import { breakdown, cashStats, cumulative, filterSessions, netProfit, tournamentStats } from './stats.js'
+import { breakdown, cashStats, cumulative, filterSessions, groupByDay, netProfit, tournamentStats } from './stats.js'
 import { parseBackup, toBackupJSON, toCSV } from './backup.js'
 
 const cash = (o) => newSession({ format: 'cash', ...o })
@@ -23,6 +23,22 @@ describe('money', () => {
     expect(formatSigned(4550)).toBe('+$45.50')
     expect(formatSigned(-30000)).toBe('−$300')
     expect(formatSigned(123456700)).toBe('+$1,234,567')
+  })
+})
+
+describe('groupByDay', () => {
+  it('puts same-day sessions together with the day total, in the order given', () => {
+    const days = groupByDay([
+      cash({ date: '2026-11-12', buyIns: [10000], cashOut: 15000 }),
+      mtt({ date: '2026-11-12', buyIns: [6000], prize: 0 }),
+      cash({ date: '2026-11-10', buyIns: [10000], cashOut: 8000 }),
+      cash({ date: '2026-11-10', status: 'active', buyIns: [10000] }), // still in play: left out
+    ])
+    expect(days.map((d) => d.date)).toEqual(['2026-11-12', '2026-11-10'])
+    expect(days[0].sessions).toHaveLength(2)
+    expect(days[0].net).toBe(-1000)
+    expect(days[1].sessions).toHaveLength(1)
+    expect(days[1].net).toBe(-2000)
   })
 })
 

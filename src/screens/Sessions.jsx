@@ -4,12 +4,13 @@ import InstallBanner from '../components/InstallBanner.jsx'
 import Logo from '../components/Logo.jsx'
 import { Badge, Profit } from '../components/ui.jsx'
 import { compareSessions, isActive, isTournament, minutesPlayed, ordinal, profit } from '../lib/sessions.js'
-import { netProfit } from '../lib/stats.js'
+import { cashStats, groupByDay, netProfit, tournamentStats } from '../lib/stats.js'
 import { formatDuration, formatMonth, todayKey } from '../lib/time.js'
 
 /**
  * The sheet: sessions in play at the top, the start buttons, then every
- * finished session newest first, grouped by month with each month's total.
+ * finished session newest first, grouped by month with each month's total and,
+ * inside a month, by day under one calendar tile. MTT rows are tinted blue.
  */
 export default function Sessions({ sessions, installed, backupDue, onStart, onAdd, onOpen, onRebuy, onFinish, onBackup }) {
   const active = sessions.filter(isActive)
@@ -29,8 +30,16 @@ export default function Sessions({ sessions, installed, backupDue, onStart, onAd
     return groups
   }, [done])
 
+  // Headline: this month, LIVE only, cash and MTT kept apart (owner, 2026-11-13).
+  // Online results have their own tab; all-time lives on the Stats screen.
   const thisMonth = todayKey().slice(0, 7)
-  const monthNet = netProfit(done.filter((s) => s.date.startsWith(thisMonth)))
+  const monthLive = useMemo(
+    () => done.filter((s) => s.setting === 'live' && s.date.startsWith(thisMonth)),
+    [done, thisMonth],
+  )
+  const cash = cashStats(monthLive)
+  const mtt = tournamentStats(monthLive)
+  const mttMinutes = monthLive.filter(isTournament).reduce((m, s) => m + (minutesPlayed(s) || 0), 0)
 
   return (
     <div className="space-y-4">
@@ -43,25 +52,39 @@ export default function Sessions({ sessions, installed, backupDue, onStart, onAd
         </button>
       )}
 
-      {/* Headline: all-time result, with this month and volume underneath. */}
+      {/* Headline: this month, live, cash | MTT side by side. */}
       {done.length > 0 && (
-        <div className="card-hero p-5">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-accent/80">All-time profit</div>
-          <Profit cents={netProfit(done)} className="mt-1 block text-[40px] leading-tight font-bold tracking-tight" />
-          <div className="mt-4 grid grid-cols-3 gap-2 border-t border-white/5 pt-3.5 text-sm">
+        <div className="card-hero p-4">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-accent/80">
+            {formatMonth(thisMonth)} · Live
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-3">
             <div>
-              <div className="text-xs text-faint">This month</div>
-              <Profit cents={monthNet} className="font-semibold" />
+              <div className="text-xs font-semibold uppercase tracking-wide text-faint">Cash</div>
+              <Profit cents={cash.net} className="mt-0.5 block text-[26px] leading-tight font-bold tracking-tight" />
+              <dl className="mt-2 space-y-1 text-sm">
+                <StatLine label="$/hour">{cash.hourly === null ? <Dash /> : <Profit cents={cash.hourly} className="font-semibold" />}</StatLine>
+                <StatLine label="$/session">{cash.average === null ? <Dash /> : <Profit cents={cash.average} className="font-semibold" />}</StatLine>
+                <StatLine label="Sessions">{cash.count}</StatLine>
+                <StatLine label="Hours">{Math.round(cash.minutes / 60)}</StatLine>
+              </dl>
             </div>
-            <div>
-              <div className="text-xs text-faint">Sessions</div>
-              <div className="num font-semibold">{done.length}</div>
-            </div>
-            <div>
-              <div className="text-xs text-faint">Hours</div>
-              <div className="num font-semibold">{Math.round(done.reduce((h, x) => h + (minutesPlayed(x) || 0), 0) / 60)}</div>
+            <div className="border-l border-white/5 pl-3">
+              <div className="text-xs font-semibold uppercase tracking-wide text-mtt">MTT</div>
+              <Profit cents={mtt.net} className="mt-0.5 block text-[26px] leading-tight font-bold tracking-tight" />
+              <dl className="mt-2 space-y-1 text-sm">
+                <StatLine label="Entries">{mtt.count}</StatLine>
+                <StatLine label="Cashes">{mtt.count ? `${mtt.cashes} / ${mtt.count}` : <Dash />}</StatLine>
+                <StatLine label="ROI">{mtt.roi === null ? <Dash /> : `${Math.round(mtt.roi * 100)}%`}</StatLine>
+                <StatLine label="Hours">{Math.round(mttMinutes / 60)}</StatLine>
+              </dl>
             </div>
           </div>
+          {cash.untimed > 0 && (
+            <div className="mt-3 text-xs text-faint">
+              $/hour leaves out {cash.untimed} cash session{cash.untimed > 1 ? 's' : ''} with no start/end time.
+            </div>
+          )}
         </div>
       )}
 
@@ -104,13 +127,51 @@ export default function Sessions({ sessions, installed, backupDue, onStart, onAd
             <Profit cents={netProfit(m.sessions)} className="text-sm font-semibold" />
           </div>
           <ul className="divide-y divide-white/5 overflow-hidden card">
-            {m.sessions.map((s) => (
-              <SessionRow key={s.id} session={s} onOpen={onOpen} />
+            {groupByDay(m.sessions).map((d) => (
+              <DayGroup key={d.date} day={d} onOpen={onOpen} />
             ))}
           </ul>
         </section>
       ))}
     </div>
+  )
+}
+
+/** One label/value line in the headline's cash or MTT column. */
+function StatLine({ label, children }) {
+  return (
+    <div className="flex items-baseline justify-between gap-2">
+      <dt className="text-xs text-faint">{label}</dt>
+      <dd className="num font-semibold">{children}</dd>
+    </div>
+  )
+}
+
+const Dash = () => <span className="text-faint">—</span>
+
+/**
+ * Every session of one day under a single calendar tile. The rows stay separate
+ * (each opens its own session); a day with more than one shows its total.
+ */
+function DayGroup({ day: d, onOpen }) {
+  const date = new Date(`${d.date}T12:00:00`)
+  const several = d.sessions.length > 1
+  return (
+    <li className="flex gap-2.5 px-2.5 py-2.5">
+      {/* Calendar tile: the date is how she will look a session up. */}
+      <div className="flex w-11 shrink-0 flex-col items-center">
+        <div className="flex h-11 w-11 flex-col items-center justify-center rounded-xl bg-surface-2 leading-none">
+          <span className="text-[10px] font-semibold uppercase text-faint">{date.toLocaleDateString('en-CA', { weekday: 'short' })}</span>
+          <span className="num mt-0.5 text-lg font-bold">{date.getDate()}</span>
+        </div>
+        {several && <Profit cents={d.net} className="mt-1 text-[10px] font-semibold" />}
+      </div>
+      <div className="min-w-0 flex-1 space-y-1.5">
+        {d.sessions.map((s) => (
+          <SessionRow key={s.id} session={s} onOpen={onOpen} />
+        ))}
+      </div>
+    </li>
   )
 }
 
@@ -123,19 +184,21 @@ function SessionRow({ session: s, onOpen }) {
     mins !== null ? formatDuration(mins) : null,
   ].filter(Boolean)
 
-  const day = new Date(`${s.date}T12:00:00`)
+  // MTT rows sit in a blue-tinted box with a blue left edge so they read apart
+  // from cash at a glance (owner, 2026-11-13); cash rows stay plain.
+  const box = tourney
+    ? 'border-l-[3px] border-mtt bg-mtt/10 active:bg-mtt/20'
+    : 'border-l-[3px] border-transparent active:bg-surface-2'
   return (
-    <li>
-      <button type="button" onClick={() => onOpen(s)} className="flex w-full items-center gap-3 px-3.5 py-3 text-left active:bg-surface-2">
-        {/* Calendar tile: the date is how she will look a session up. */}
-        <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-surface-2 leading-none">
-          <span className="text-[10px] font-semibold uppercase text-faint">{day.toLocaleDateString('en-CA', { weekday: 'short' })}</span>
-          <span className="num mt-0.5 text-lg font-bold">{day.getDate()}</span>
-        </div>
+    <button
+      type="button"
+      onClick={() => onOpen(s)}
+      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left ${box}`}
+    >
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <span className="truncate font-semibold">{s.venue || (tourney ? 'Tournament' : 'Cash game')}</span>
-            {tourney && <Badge>MTT</Badge>}
+            {tourney && <Badge tone="mtt">MTT</Badge>}
             {s.setting === 'online' && <Badge>Online</Badge>}
           </div>
           <div className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted">
@@ -144,7 +207,6 @@ function SessionRow({ session: s, onOpen }) {
           </div>
         </div>
         <Profit cents={profit(s)} className="font-bold" />
-      </button>
-    </li>
+    </button>
   )
 }

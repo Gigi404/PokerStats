@@ -121,6 +121,26 @@ export function tournamentStats(sessions) {
 }
 
 /**
+ * Finished sessions grouped by calendar day, keeping the order they came in
+ * (the Sessions list passes them newest first). Each day carries its net.
+ *
+ * @returns {{date:string, sessions:object[], net:number}[]}
+ */
+export function groupByDay(sessions) {
+  const days = []
+  for (const s of finished(sessions)) {
+    let day = days.at(-1)
+    if (!day || day.date !== s.date) {
+      day = { date: s.date, sessions: [], net: 0 }
+      days.push(day)
+    }
+    day.sessions.push(s)
+    day.net += profit(s) ?? 0
+  }
+  return days
+}
+
+/**
  * Running total after each finished session, oldest first — the chart's data.
  *
  * @returns {{session, result:number, total:number}[]}

@@ -102,6 +102,7 @@ export function Badge({ children, tone = 'plain' }) {
   const tones = {
     plain: 'bg-surface-2 text-muted',
     accent: 'bg-accent/15 text-accent',
+    mtt: 'bg-mtt/20 text-mtt',
   }
   return <span className={`inline-block rounded-md px-1.5 py-0.5 text-[11px] font-medium ${tones[tone]}`}>{children}</span>
 }

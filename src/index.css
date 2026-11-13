@@ -20,6 +20,9 @@
   --color-accent-ink: #1a1405;
   --color-gain: #5ad48a;
   --color-loss: #f2777a;
+  /* Tournaments (MTT) on the session list: a cool blue so an MTT row reads
+     apart from a cash row at a glance, without colliding with gold, gain or loss. */
+  --color-mtt: #6fa8ff;
 
   --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Segoe UI', Roboto, sans-serif;
 }
