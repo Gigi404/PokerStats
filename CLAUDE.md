@@ -60,7 +60,10 @@ sync lands, plus a 07:30 daily fallback).
 - Envelope: `{v, alg:'AES-256-GCM', kdf:'PBKDF2-SHA256', iter, salt, iv, ct,
   published_at}`; `ct` = ciphertext‖tag, exactly what WebCrypto wants, so no crypto
   library is bundled (`src/lib/online.js`). Only `published_at` is readable
-  without the key.
+  without the key. **Since 2026-11-15 the publisher gzips before encrypting: `v: 2,
+  zip: 'gzip'`** (991 KB of JSON → ~170 KB download); the app inflates with
+  `DecompressionStream`, fflate only on phones without it. The app must ship before
+  the beast sends any new envelope format: an older app shows "update the app".
 - **Passphrase entered once per phone**, kept in the META store; the derived
   non-extractable `CryptoKey` is cached per salt so most opens skip the ~1s PBKDF2
   (`src/hooks/useOnline.js`). "Lock on this phone" removes both.
@@ -68,6 +71,12 @@ sync lands, plus a 07:30 daily fallback).
 - Views: Overview · Tournaments (history + detail sheet with satellite ↔ seat
   links) · My game (stats vs typical ranges, opening % by seat, stack depth, leak
   trends, tickets). The ranges ship in the file — the app has no poker knowledge.
+- **Tournaments | Cash** (v0.33.0, 2026-11-15): the two never share a screen. Cash
+  (`OnlineCash.jsx`) has sessions, stakes, cash My game and a review per session
+  from `summary.cash` (PokerEdge `core/cash_sessions.py`); cards that cover both
+  games take a fixed `game` prop. Puzzles carry their table (`p.t`) and are dealt out
+  on `components/PokerTable.jsx`, with the game layer in `lib/game.js` (meta
+  `puzzleGame`). Local test builds need `MSYS_NO_PATHCONV=1` in Git Bash.
 - Service worker: NetworkFirst for the file, so the tab works offline from the
   last copy. `src/lib/online.fixture.json` was encrypted by PokerEdge's Python
   publisher, so the tests prove the phone opens what the beast sends.

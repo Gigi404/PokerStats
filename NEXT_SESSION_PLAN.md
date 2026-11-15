@@ -2,11 +2,16 @@
 
 <!-- BRIEF:START -->
 DO NOW
+🔴 v0.33.0   | Pushed 11-15. Online: a Tournaments | Cash switch; Cash has
+             | sessions, stakes, cash My game and a full review per session.
+             | Puzzles: dealt out at a felt table, then you act; points, streak,
+             | levels, mastery, a ⏱ time bank, sounds. Reads the new gzipped
+             | file. Open it on a phone (footer: v0.33.0), play a few puzzles
+             | with sound on, open a cash session review. Checked only in a
+             | 390×750 frame on the laptop.
 🟡 new 11-13 | Sessions: header is this month (live only), Cash and MTT side
              | by side; same-day sessions share one calendar tile with the day
-             | total; MTT rows are blue. Live since 11-13 (f9fd97a), unseen on a
-             | phone. No version bump: the footer still says v0.31.0, so it
-             | cannot tell you which build you have.
+             | total; MTT rows are blue. Unseen on a phone.
 🟡 v0.31.0   | My game opens on your costliest leak, with Practise buttons into
              | Puzzles; the recap has "Practise these". Checked at 390px in
              | headless Chrome, not on a phone. In the review checklist.
@@ -24,6 +29,8 @@ DO NOW
 🟡 her phone | Her app gets the same update; her puzzle progress is her own.
 
 NEEDS YOUR CALL
+🟡 review    | The ✎ Review button is hidden on Puzzles (it covered the table's
+             | buttons); review notes still open from More. Keep it that way?
 🟡 next      | Step 5 built ahead of your review notes (v0.31.0): the notes now adjust it.
 🟡 memorable | Still open from 09-24: memorable hands for live sessions.
 
@@ -32,7 +39,7 @@ CARRIED OVER — still open, still correct
              | check runs or a gap closes — the bankroll row first, once the
              | cashier balance is typed in.
 🟡 log       | This repo's session log still lives in CLAUDE.md (16k chars).
-             | 10-29, 10-31 and 11-13 were logged in PokerEdge's docs/SESSION_LOG.md; moving
+             | 10-29, 10-31, 11-13 and 11-15 were logged in PokerEdge's docs/SESSION_LOG.md; moving
              | this log to docs/SESSION_LOG.md needs the owner's OK.
 🟡 backup    | Her live sessions exist only on her phone: nudge one backup
              | (More → Backup → Save a backup → Files).
@@ -46,7 +53,9 @@ SETTLED
              | upstream. The app words it, judges nothing.
 ✅ replay    | Key hands only, not every hand.
 ✅ split     | Me / Her / Both tags per tournament, on the phone — after the HUD.
-✅ puzzles   | Progress lives on each phone (IndexedDB), not shared.
+✅ puzzles   | Progress lives on each phone (IndexedDB), not shared. Since 11-15
+             | the game score, streak and level too (meta `puzzleGame`).
+✅ cash      | Tournaments and cash never share a screen on Online (11-15).
 ✅ live only  | the session form logs live poker only; online results arrive by
              | themselves on the Online tab. Old online sessions stay.
 ✅ venues     | a home game is a venue "Home game · <name>"; its sit & go formats
