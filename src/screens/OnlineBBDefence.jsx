@@ -22,11 +22,16 @@ const CELL = {
   fold: 'bg-surface-2 text-faint',
 }
 
-/** @param {{d: object}} props  summary.play.bb_defence */
-export default function BBDefence({ d: block }) {
+/**
+ * @param {{d: object, game?: 'tournament' | 'cash'}} props  summary.play.bb_defence;
+ *   `game` fixes the game and hides the switch (the Online tab's Tournaments /
+ *   Cash halves, 2026-11-15).
+ */
+export default function BBDefence({ d: block, game: fixed }) {
   const [opener, setOpener] = useState('BTN')
-  const [game, setGame] = useState('tournament')
-  if (!block || !block.rates) return null
+  const [picked, setGame] = useState('tournament')
+  const game = fixed || picked
+  if (!block || !block.rates || (fixed === 'cash' && !block.cash)) return null
   // Tournaments are the block itself (as published since v0.12.0); cash, when
   // present, is the same shape under `cash`.
   const d = game === 'cash' && block.cash ? block.cash : block
@@ -38,7 +43,7 @@ export default function BBDefence({ d: block }) {
       <p className="mb-2 text-[11px] text-faint">
         One raise, nobody called, you in the big blind. Defending = calling or 3-betting. Under each: this pool.
       </p>
-      {block.cash && (
+      {block.cash && !fixed && (
         <div className="mb-2">
           <Segmented
             size="sm"

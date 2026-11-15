@@ -37,17 +37,19 @@ const SITUATIONS = [
 ]
 
 /**
- * @param {{f: object}} props  summary.play.flop (absent in older files)
+ * @param {{f: object, game?: 'tournament' | 'cash'}} props  summary.play.flop
+ *   (absent in older files); `game` fixes the game and hides the switch.
  */
-export default function FlopHabits({ f }) {
-  const [game, setGame] = useState('tournament')
-  if (!f || !f.tournament) return null
+export default function FlopHabits({ f, game: fixed }) {
+  const [picked, setGame] = useState('tournament')
+  const game = fixed || picked
+  if (!f || !f.tournament || !f[game]) return null
   const g = f[game]
   return (
     <div className="card p-3.5">
       <div className={title}>Flop habits</div>
       <p className="mb-2 text-[11px] text-faint">Every flop you saw. Under each: typical · this pool.</p>
-      <div className="mb-2">
+      {!fixed && <div className="mb-2">
         <Segmented
           size="sm"
           value={game}
@@ -57,7 +59,7 @@ export default function FlopHabits({ f }) {
             { value: 'cash', label: 'Cash' },
           ]}
         />
-      </div>
+      </div>}
       <table className="num w-full table-fixed text-sm">
         <colgroup>
           <col />

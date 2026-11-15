@@ -62,7 +62,9 @@ export class WrongPassphraseError extends Error {
  * @throws {WrongPassphraseError} when the key is wrong
  */
 export async function openEnvelope(envelope, key) {
-  if (envelope?.v !== 1 || envelope.alg !== 'AES-256-GCM') {
+  // v1: plain JSON. v2 (2026-11-15): gzipped before encryption, `zip: 'gzip'`.
+  const known = (envelope?.v === 1 || (envelope?.v === 2 && envelope.zip === 'gzip')) && envelope.alg === 'AES-256-GCM'
+  if (!known) {
     throw new Error('The online results file is in a format this version of the app does not know. Update the app.')
   }
   let plain
@@ -71,7 +73,24 @@ export async function openEnvelope(envelope, key) {
   } catch {
     throw new WrongPassphraseError()
   }
+  if (envelope.zip === 'gzip') plain = await gunzip(new Uint8Array(plain))
   return JSON.parse(new TextDecoder().decode(plain))
+}
+
+/**
+ * Undo the publisher's gzip. The browser's own DecompressionStream does it
+ * (iOS 16.4+, every current browser); older phones load fflate, only then.
+ *
+ * @param {Uint8Array} bytes
+ * @returns {Promise<Uint8Array>}
+ */
+export async function gunzip(bytes) {
+  if (typeof DecompressionStream === 'function') {
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))
+    return new Uint8Array(await new Response(stream).arrayBuffer())
+  }
+  const { gunzipSync } = await import('fflate')
+  return gunzipSync(bytes)
 }
 
 // ---------------------------------------------------------------------------
@@ -185,3 +204,18 @@ export function outcomeLabel(t) {
 export function monthLabel(key) {
   return new Date(`${key}-15T12:00:00`).toLocaleDateString('en-CA', { month: 'short', year: 'numeric' })
 }
+
+/** One decimal with a real minus sign and a plus on gains: '+6.2', '−1.5', '—'. */
+export function signed(v) {
+  if (v === null || v === undefined) return '—'
+  return `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(Math.round(v * 10) / 10)}`
+}
+
+/** My game's stat rows: [key, label, hint], tournament and cash alike. */
+export const STAT_ROWS = [
+  ['vpip', 'VPIP', 'Hands played voluntarily'],
+  ['pfr', 'PFR', 'Hands raised before the flop'],
+  ['three_bet', '3-bet', 'Re-raise when facing a raise'],
+  ['wtsd', 'Went to showdown', 'Of flops played'],
+  ['wsd', 'Won at showdown', 'Of showdowns'],
+]

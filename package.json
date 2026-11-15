@@ -1,7 +1,7 @@
 {
   "name": "pokerstats",
   "private": true,
-  "version": "0.32.0",
+  "version": "0.33.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "fetch:playground": "node scripts/fetch-playground.mjs"
   },
   "dependencies": {
+    "fflate": "0.8.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

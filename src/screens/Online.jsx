@@ -14,9 +14,12 @@ import {
   formatUSD,
   monthLabel,
   outcomeLabel,
+  signed,
+  STAT_ROWS,
   tournamentCurve,
 } from '../lib/online.js'
 import { ageLabel } from '../lib/playground.js'
+import Cash from './OnlineCash.jsx'
 import Charts from './OnlineCharts.jsx'
 import Goal from './OnlineGoal.jsx'
 import DeepThreeBet from './OnlineDeep.jsx'
@@ -43,7 +46,7 @@ import { formatDay } from '../lib/time.js'
 const usdCents = (cents) => formatSignedUSD(cents / 100)
 
 /** A signed USD amount, green up / red down; the sign is in the text too. */
-function USD({ value, className = '' }) {
+export function USD({ value, className = '' }) {
   const tone = value > 0 ? 'text-gain' : value < 0 ? 'text-loss' : 'text-muted'
   return <span className={`num ${tone} ${className}`}>{formatSignedUSD(value)}</span>
 }
@@ -55,6 +58,9 @@ function USD({ value, className = '' }) {
  */
 export default function Online({ onPractise }) {
   const online = useOnline()
+  // Tournaments | Cash (owner, 2026-11-15): the two games never share a
+  // screen. Null until chosen: then whichever was played last opens.
+  const [game, setGame] = useState(null)
   // Recent first: it is the "how did we play" view, the reason the tab exists.
   // Files published before the review existed have no recent_days — those
   // open on Overview instead.
@@ -81,13 +87,50 @@ export default function Online({ onPractise }) {
   const hasRecent = Array.isArray(data.recent_days)
   const current = view === 'recent' && !hasRecent ? 'overview' : view
   const puzzles = data.play?.puzzles?.items || []
+  const side = game || lastPlayed(data)
+  // "Practise these" stays in the half it was pressed in: a cash leak goes to
+  // cash puzzles, a tournament one to tournament puzzles (2026-11-15).
+  const inGame = (p) => (p.game || 'tournament') === side
   const practise = {
-    start: onPractise,
-    count: (lessons) => puzzles.filter(focusFilter(lessons).test).length,
+    start: (lessons) => onPractise(lessons, side),
+    count: (lessons) => puzzles.filter((p) => inGame(p) && focusFilter(lessons).test(p)).length,
+  }
+  const footer = (
+    <p className="px-1 text-center text-xs text-faint">
+      PokerStars · {data.meta.hero} · sent {ageLabel(online.publishedAt)}
+      <br />
+      Hands up to {formatDay(String(data.meta.data_through || '').slice(0, 10))} · amounts in US dollars
+      <br />
+      <button type="button" className="mt-2 text-faint underline" onClick={online.forget}>
+        Lock on this phone
+      </button>
+    </p>
+  )
+  const switcher = data.cash?.hands > 0 && (
+    <Segmented
+      value={side}
+      onChange={setGame}
+      options={[
+        { value: 'tournament', label: 'Tournaments' },
+        { value: 'cash', label: 'Cash' },
+      ]}
+    />
+  )
+  if (switcher && side === 'cash') {
+    return (
+      <PractiseContext.Provider value={practise}>
+        <div className="space-y-4">
+          {switcher}
+          <Cash data={data} />
+          {footer}
+        </div>
+      </PractiseContext.Provider>
+    )
   }
   return (
     <PractiseContext.Provider value={practise}>
       <div className="space-y-4">
+        {switcher}
         <Segmented
           size="sm"
           value={current}
@@ -117,18 +160,21 @@ export default function Online({ onPractise }) {
           <MyGame data={data} />
         )}
 
-        <p className="px-1 text-center text-xs text-faint">
-          PokerStars · {data.meta.hero} · sent {ageLabel(online.publishedAt)}
-          <br />
-          Hands up to {formatDay(String(data.meta.data_through || '').slice(0, 10))} · amounts in US dollars
-          <br />
-          <button type="button" className="mt-2 text-faint underline" onClick={online.forget}>
-            Lock on this phone
-          </button>
-        </p>
+        {footer}
       </div>
     </PractiseContext.Provider>
   )
+}
+
+/**
+ * The game the Online tab opens on: whichever hero played last. Compared as
+ * 'YYYY-MM-DD HH:MM' strings, which sort in time order.
+ */
+function lastPlayed(data) {
+  const cash = String(data.cash?.last_played || '').slice(0, 16)
+  const history = data.tournaments?.history || []
+  const tourn = String(history[history.length - 1]?.end || '').replace('T', ' ').slice(0, 16)
+  return cash && cash > tourn ? 'cash' : 'tournament'
 }
 
 /** First open on a phone: ask for the passphrase once. */
@@ -231,7 +277,7 @@ function Overview({ data }) {
         <Tile label="Bounties" sub={`${t.knockouts} knockouts`}>
           {formatUSD(t.bounties)}
         </Tile>
-        <Tile label="Hands" sub={`${data.meta.hands.cash.toLocaleString('en-CA')} cash`}>
+        <Tile label="Hands">
           {data.meta.hands.tournament.toLocaleString('en-CA')}
         </Tile>
       </div>
@@ -254,19 +300,6 @@ function Overview({ data }) {
         rateLabel="ROI"
       />
 
-      {data.cash.hands > 0 && (
-        <div className="card p-3.5">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Cash games</div>
-          <div className="num flex items-baseline justify-between">
-            <USD value={data.cash.net} className="text-xl font-semibold" />
-            <span className="text-sm text-muted">{signed(data.cash.bb_per_100)} bb/100</span>
-          </div>
-          <div className="mt-0.5 text-xs text-muted">
-            {data.cash.hands.toLocaleString('en-CA')} hands · last played {formatDay(String(data.cash.last_played).slice(0, 10), true)}
-          </div>
-        </div>
-      )}
-
       <p className="px-1 text-xs text-faint">
         Prizes include bounties, tickets and satellite seats at face value. A tournament whose last hand was never
         saved counts as a bust.
@@ -276,7 +309,7 @@ function Overview({ data }) {
 }
 
 /** Name · count · rate · net table, the same shape as the Stats tab's breakdowns. */
-function Table({ title, rows, rateLabel }) {
+export function Table({ title, rows, rateLabel }) {
   if (!rows.length) return null
   return (
     <div className="card p-3.5">
@@ -457,7 +490,7 @@ function Detail({ t, byId, onOpen, onClose, onReview }) {
   )
 }
 
-function Row({ label, children }) {
+export function Row({ label, children }) {
   return (
     <div className="flex justify-between">
       <dt className="text-muted">{label}</dt>
@@ -470,13 +503,6 @@ function Row({ label, children }) {
 // My game
 // ---------------------------------------------------------------------------
 
-const STAT_ROWS = [
-  ['vpip', 'VPIP', 'Hands played voluntarily'],
-  ['pfr', 'PFR', 'Hands raised before the flop'],
-  ['three_bet', '3-bet', 'Re-raise when facing a raise'],
-  ['wtsd', 'Went to showdown', 'Of flops played'],
-  ['wsd', 'Won at showdown', 'Of showdowns'],
-]
 const BAND_STYLE = { low: 'text-accent', high: 'text-accent', ok: 'text-gain' }
 const BAND_WORD = { low: '↓low', high: '↑high', ok: 'ok' }
 
@@ -495,11 +521,11 @@ function MyGame({ data }) {
     trends: <Trends trends={play.trends} ranges={benchmarks.open_by_seat} />,
     short: <ShortStack s={play.short_stack} />,
     deep: <DeepThreeBet d={play.deep_threebet} />,
-    bb: <BBDefence d={play.bb_defence} />,
-    flop: <FlopHabits f={play.flop} />,
-    post: <Postflop p={play.postflop} />,
+    bb: <BBDefence d={play.bb_defence} game="tournament" />,
+    flop: <FlopHabits f={play.flop} game="tournament" />,
+    post: <Postflop p={play.postflop} game="tournament" />,
     sizing: <Sizing s={play.sizing} />,
-    river: <RiverChoice r={play.river_choice} />,
+    river: <RiverChoice r={play.river_choice} game="tournament" />,
     position: <Position p={play.position} />,
     suits: <Suits s={play.suits} />,
     tilt: <Tilt t={play.tilt} />,
@@ -544,13 +570,9 @@ function StatsVsTypical({ data }) {
     ? [
         { head: 'Full', sub: `${fullMin}+ players`, stats: play.tournament_full, ranges: benchmarks.tournament },
         { head: 'Short', sub: `2–${fullMin - 1}`, stats: play.tournament_short, ranges: null },
-        { head: 'Cash', sub: '', stats: play.cash, ranges: benchmarks.cash },
       ]
-    : [
-        { head: 'Tourn.', sub: '', stats: play.tournament, ranges: benchmarks.tournament },
-        { head: 'Cash', sub: '', stats: play.cash, ranges: benchmarks.cash },
-      ]
-  const colWidth = split ? 'w-[4.5rem]' : 'w-24'
+    : [{ head: 'Tourn.', sub: '', stats: play.tournament, ranges: benchmarks.tournament }]
+  const colWidth = 'w-24'
   return (
     <>
       <div className="card p-3.5">
@@ -638,12 +660,7 @@ function ByStack({ rows }) {
   )
 }
 
-function signed(v) {
-  if (v === null || v === undefined) return '—'
-  return `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(Math.round(v * 10) / 10)}`
-}
-
-function StatCell({ value, range }) {
+export function StatCell({ value, range }) {
   const b = band(value, range)
   return (
     <td className="py-2 text-right align-top">

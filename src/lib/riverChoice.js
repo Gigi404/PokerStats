@@ -12,6 +12,15 @@ function totals(r) {
   return { n: sum('n'), value: sum('missed_value'), bad: sum('bad_bet'), bets: sum('bets') }
 }
 
+/**
+ * One game's half of the block: its totals row and its spots. The Online
+ * tab's Tournaments and Cash halves (2026-11-15) each show only their own.
+ */
+export function onlyGame(r, game) {
+  const mine = (list) => (list || []).filter((g) => g.game === game)
+  return { ...r, games: { [game]: r.games?.[game] }, spots: mine(r.spots), consider: mine(r.consider) }
+}
+
 /** The headline: which side of the river you lose more on. */
 export function riverHeadline(r) {
   const t = totals(r)

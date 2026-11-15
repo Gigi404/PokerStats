@@ -1,5 +1,5 @@
 import Cards from '../components/Cards.jsx'
-import { rangeLine, riverHeadline, sizeLabel, spotLabel } from '../lib/riverChoice.js'
+import { onlyGame, rangeLine, riverHeadline, sizeLabel, spotLabel } from '../lib/riverChoice.js'
 
 /*
   River choices (2026-10-30), from PokerEdge's analysis/river_bet_grading.py
@@ -33,9 +33,14 @@ function Spot({ g, amount }) {
   )
 }
 
-/** @param {{r: object}} props  summary.play.river_choice */
-export default function RiverChoice({ r }) {
-  if (!r?.games) return null
+/**
+ * @param {{r: object, game?: 'tournament' | 'cash'}} props  summary.play.river_choice;
+ *   `game` keeps that game's row and spots only, and the headline reads it.
+ */
+export default function RiverChoice({ r: all, game }) {
+  if (!all?.games) return null
+  const r = game ? onlyGame(all, game) : all
+  if (game && !r.games[game]?.n) return null
   const h = riverHeadline(r)
   return (
     <div className="card p-3.5">
@@ -61,7 +66,7 @@ export default function RiverChoice({ r }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-white/5">
-          {GAMES.map(([key, label]) => {
+          {GAMES.filter(([key]) => !game || key === game).map(([key, label]) => {
             const g = r.games[key]
             if (!g?.n) return null
             return (
