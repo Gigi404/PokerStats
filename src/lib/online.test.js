@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import fixture from './online.fixture.json'
+import fixtureV2 from './online.fixture.v2.json'
 import {
   BAND_ARROW,
   WrongPassphraseError,
@@ -8,6 +9,7 @@ import {
   formatPct,
   formatSignedUSD,
   formatUSD,
+  gunzip,
   openEnvelope,
   ordinal,
   outcomeLabel,
@@ -32,7 +34,30 @@ describe('online envelope', () => {
 
   it('refuses an envelope version it does not know', async () => {
     const key = await deriveKey('test phrase élan', fixture)
+    // v2 without its zip marker, and a v3, are both unknown.
     await expect(openEnvelope({ ...fixture, v: 2 }, key)).rejects.toThrow(/Update the app/)
+    await expect(openEnvelope({ ...fixtureV2, v: 3 }, key)).rejects.toThrow(/Update the app/)
+  })
+
+  // online.fixture.v2.json: the same encryptor since 2026-11-15, which gzips
+  // the summary first (2,000 bytes of padding become a 152-byte ciphertext).
+  it('opens a gzipped v2 file encrypted by PokerEdge', async () => {
+    const key = await deriveKey('test phrase élan', fixtureV2)
+    const doc = await openEnvelope(fixtureV2, key)
+    expect(doc.tournaments.totals).toEqual({ n: 2, net: 12.5 })
+    expect(doc.padding).toHaveLength(2000)
+  })
+
+  it('gunzips without the browser stream too (older iPhones)', async () => {
+    const native = globalThis.DecompressionStream
+    const { gzipSync } = await import('fflate')
+    const packed = gzipSync(new TextEncoder().encode('{"ok":true}'))
+    try {
+      globalThis.DecompressionStream = undefined
+      expect(new TextDecoder().decode(await gunzip(packed))).toBe('{"ok":true}')
+    } finally {
+      globalThis.DecompressionStream = native
+    }
   })
 })
 
