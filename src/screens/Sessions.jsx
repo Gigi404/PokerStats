@@ -4,7 +4,7 @@ import InstallBanner from '../components/InstallBanner.jsx'
 import Logo from '../components/Logo.jsx'
 import { Badge, Profit } from '../components/ui.jsx'
 import { compareSessions, isActive, isTournament, minutesPlayed, ordinal, profit } from '../lib/sessions.js'
-import { cashStats, groupByDay, netProfit, tournamentStats } from '../lib/stats.js'
+import { groupByDay, monthHeadline, netProfit } from '../lib/stats.js'
 import { formatDuration, formatMonth, todayKey } from '../lib/time.js'
 
 /**
@@ -31,15 +31,9 @@ export default function Sessions({ sessions, installed, backupDue, onStart, onAd
   }, [done])
 
   // Headline: this month, LIVE only, cash and MTT kept apart (owner, 2026-11-13).
-  // Online results have their own tab; all-time lives on the Stats screen.
+  // The rules live in monthHeadline (stats.js) so they are unit-tested.
   const thisMonth = todayKey().slice(0, 7)
-  const monthLive = useMemo(
-    () => done.filter((s) => s.setting === 'live' && s.date.startsWith(thisMonth)),
-    [done, thisMonth],
-  )
-  const cash = cashStats(monthLive)
-  const mtt = tournamentStats(monthLive)
-  const mttMinutes = monthLive.filter(isTournament).reduce((m, s) => m + (minutesPlayed(s) || 0), 0)
+  const { cash, mtt, mttMinutes } = useMemo(() => monthHeadline(sessions, thisMonth), [sessions, thisMonth])
 
   return (
     <div className="space-y-4">

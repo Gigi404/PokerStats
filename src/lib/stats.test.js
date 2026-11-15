@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { centsToInput, formatSigned, toCents } from './money.js'
 import { durationMinutes } from './time.js'
 import { newSession, profit, validate } from './sessions.js'
-import { breakdown, cashStats, cumulative, filterSessions, groupByDay, netProfit, tournamentStats } from './stats.js'
+import { breakdown, cashStats, cumulative, filterSessions, groupByDay, monthHeadline, netProfit, tournamentStats } from './stats.js'
 import { parseBackup, toBackupJSON, toCSV } from './backup.js'
 
 const cash = (o) => newSession({ format: 'cash', ...o })
@@ -39,6 +39,65 @@ describe('groupByDay', () => {
     expect(days[0].net).toBe(-1000)
     expect(days[1].sessions).toHaveLength(1)
     expect(days[1].net).toBe(-2000)
+  })
+})
+
+describe('monthHeadline', () => {
+  // The Sessions header: one month, live only, finished only (owner, 2026-11-13).
+  it('leaves out online sessions', () => {
+    const h = monthHeadline([
+      cash({ date: '2026-11-03', buyIns: [10000], cashOut: 15000 }),
+      cash({ date: '2026-11-04', setting: 'online', buyIns: [2000], cashOut: 9000 }),
+      mtt({ date: '2026-11-05', setting: 'online', buyIns: [1100], prize: 5000 }),
+    ], '2026-11')
+    expect(h.cash.count).toBe(1)
+    expect(h.cash.net).toBe(5000)
+    expect(h.mtt.count).toBe(0)
+  })
+
+  it('leaves out last month and the same month a year ago', () => {
+    const h = monthHeadline([
+      cash({ date: '2026-11-01', buyIns: [10000], cashOut: 12000 }),
+      cash({ date: '2026-10-31', buyIns: [10000], cashOut: 30000 }),
+      cash({ date: '2025-11-14', buyIns: [10000], cashOut: 30000 }),
+      mtt({ date: '2025-11-20', buyIns: [6000], prize: 50000 }),
+    ], '2026-11')
+    expect(h.cash.count).toBe(1)
+    expect(h.cash.net).toBe(2000)
+    expect(h.mtt.count).toBe(0)
+  })
+
+  it('leaves out a session still in play', () => {
+    const h = monthHeadline([
+      mtt({ date: '2026-11-10', buyIns: [6000], prize: 0, start: '19:00', end: '21:00' }),
+      mtt({ date: '2026-11-12', status: 'active', buyIns: [6000], start: '19:00' }),
+      cash({ date: '2026-11-12', status: 'active', buyIns: [10000], start: '20:00' }),
+    ], '2026-11')
+    expect(h.mtt.count).toBe(1)
+    expect(h.mtt.net).toBe(-6000)
+    expect(h.cash.count).toBe(0)
+    expect(h.mttMinutes).toBe(120)
+  })
+
+  it('sums MTT minutes across midnight, counting a missing time as 0', () => {
+    const h = monthHeadline([
+      mtt({ date: '2026-11-07', buyIns: [6000], prize: 0, start: '18:00', end: '20:30' }), // 150
+      mtt({ date: '2026-11-08', buyIns: [6000], prize: 20000, start: '21:00', end: '02:30' }), // 330, crosses midnight
+      mtt({ date: '2026-11-09', buyIns: [6000], prize: 0, start: '19:00', end: '' }), // no end: 0
+      cash({ date: '2026-11-09', buyIns: [10000], cashOut: 10000, start: '12:00', end: '16:00' }), // cash: not MTT hours
+    ], '2026-11')
+    expect(h.mtt.count).toBe(3) // the untimed one still counts as an entry
+    expect(h.mttMinutes).toBe(480)
+    expect(h.cash.minutes).toBe(240)
+  })
+
+  it('gives zeroed stats for an empty month without throwing', () => {
+    for (const list of [[], [cash({ date: '2026-10-02', buyIns: [10000], cashOut: 0 })]]) {
+      const h = monthHeadline(list, '2026-11')
+      expect(h.mttMinutes).toBe(0)
+      expect(h.cash).toMatchObject({ count: 0, net: 0, minutes: 0, hourly: null, average: null, untimed: 0 })
+      expect(h.mtt).toMatchObject({ count: 0, net: 0, cashes: 0, roi: null })
+    }
   })
 })
 
