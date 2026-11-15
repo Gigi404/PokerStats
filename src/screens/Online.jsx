@@ -87,11 +87,14 @@ export default function Online({ onPractise }) {
   const hasRecent = Array.isArray(data.recent_days)
   const current = view === 'recent' && !hasRecent ? 'overview' : view
   const puzzles = data.play?.puzzles?.items || []
-  const practise = {
-    start: onPractise,
-    count: (lessons) => puzzles.filter(focusFilter(lessons).test).length,
-  }
   const side = game || lastPlayed(data)
+  // "Practise these" stays in the half it was pressed in: a cash leak goes to
+  // cash puzzles, a tournament one to tournament puzzles (2026-11-15).
+  const inGame = (p) => (p.game || 'tournament') === side
+  const practise = {
+    start: (lessons) => onPractise(lessons, side),
+    count: (lessons) => puzzles.filter((p) => inGame(p) && focusFilter(lessons).test(p)).length,
+  }
   const footer = (
     <p className="px-1 text-center text-xs text-faint">
       PokerStars · {data.meta.hero} · sent {ageLabel(online.publishedAt)}

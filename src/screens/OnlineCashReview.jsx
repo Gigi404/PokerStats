@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import ProfitChart from '../components/ProfitChart.jsx'
-import { PractiseContext } from '../hooks/usePractise.js'
 import { formatSignedUSD } from '../lib/online.js'
 import { handCurve, stakesLabel } from '../lib/cash.js'
 import { canReplay } from '../lib/replay.js'
@@ -76,11 +75,9 @@ export default function CashReview({ s, onClose }) {
             In cash, the grade covers your big blind against one raise and your answers to a bet after the flop. Opens,
             3-bets and all-ins before the flop are not graded in cash yet.
           </p>
-          {/* No "Practise these" yet: the puzzle bank holds tournament spots
-              only, so it would send a cash leak to tournament puzzles. */}
-          <PractiseContext.Provider value={null}>
-            <WorkOn recap={review.recap} />
-          </PractiseContext.Provider>
+          {/* "Practise these" sends the leaks to cash puzzles: Online's
+              practise context is scoped to the half it is open on. */}
+          <WorkOn recap={review.recap} />
 
           <div className="card p-3.5">
             <div className={title}>How the session went</div>

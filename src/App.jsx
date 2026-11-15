@@ -32,8 +32,10 @@ export default function App() {
     setMoreView(null)
     setPractice(null)
   }
-  const practise = (lessons) => {
-    setPractice(lessons)
+  // `game` ('tournament' | 'cash'): which half of Online sent them, so the
+  // practice stays in that game (2026-11-15).
+  const practise = (lessons, game = 'all') => {
+    setPractice({ lessons, game })
     setTab('puzzles')
   }
   // Review notes (2026-10-17): a sheet over any screen, from a floating
@@ -133,7 +135,7 @@ export default function App() {
         ) : tab === 'online' ? (
           <Online onPractise={practise} />
         ) : tab === 'puzzles' ? (
-          <Puzzles focus={practice} />
+          <Puzzles focus={practice?.lessons ?? null} focusGame={practice?.game ?? 'all'} />
         ) : tab === 'stats' ? (
           <Stats sessions={sessions} />
         ) : moreView === 'playground' ? (
@@ -147,18 +149,14 @@ export default function App() {
         )}
       </main>
 
-      {!reviewHidden && !editing && (
+      {/* Not on Puzzles (2026-11-15): wherever it floats it covers the table's
+          buttons or the game bar. Review notes stay reachable under More. */}
+      {!reviewHidden && !editing && tab !== 'puzzles' && (
         <button
           type="button"
           onClick={() => setReviewOpen(true)}
           className="fixed right-4 z-20 rounded-full border border-accent/40 bg-surface/95 px-3.5 py-2 text-[13px] font-semibold text-accent shadow-lg backdrop-blur"
-          // On Puzzles it moves to the top corner: at the bottom it covered
-          // the table's action buttons (2026-11-15).
-          style={
-            tab === 'puzzles'
-              ? { top: 'calc(env(safe-area-inset-top) + 14px)' }
-              : { bottom: 'calc(env(safe-area-inset-bottom) + 84px)' }
-          }
+          style={{ bottom: 'calc(env(safe-area-inset-bottom) + 84px)' }}
         >
           ✎ Review
         </button>

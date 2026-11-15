@@ -73,7 +73,7 @@ export default function PokerTable({ t, frame, heroCards, reveal = false }) {
   return (
     // Never taller than about half the screen, so on a phone the header, the
     // table and the action buttons fit without scrolling.
-    <div className="relative mx-auto aspect-[4/5] select-none" style={{ width: 'min(100%, 26rem, calc(46svh * 0.8))' }}>
+    <div className="relative mx-auto aspect-[4/5] select-none" style={{ width: 'min(100%, 26rem, calc(42svh * 0.8))' }}>
       {/* Rail and felt. */}
       <div
         className="absolute inset-x-[7%] inset-y-[9%] rounded-[50%] p-[10px] shadow-[0_10px_30px_rgba(0,0,0,0.6)]"
