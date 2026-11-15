@@ -2,13 +2,10 @@
 
 <!-- BRIEF:START -->
 DO NOW
-🔴 v0.33.0   | Pushed 11-15. Online: a Tournaments | Cash switch; Cash has
-             | sessions, stakes, cash My game and a full review per session.
-             | Puzzles: dealt out at a felt table, then you act; points, streak,
-             | levels, mastery, a ⏱ time bank, sounds. Reads the new gzipped
-             | file. Open it on a phone (footer: v0.33.0), play a few puzzles
-             | with sound on, open a cash session review. Checked only in a
-             | 390×750 frame on the laptop.
+🟡 v0.33.0   | Live 11-15 and working on your phone: the gzipped file opens,
+             | puzzles show the table. Still to try properly: sound, the ⏱
+             | time bank, a cash session review, the Cash filter. Updating an
+             | installed copy took two full close-and-reopens.
 🟡 new 11-13 | Sessions: header is this month (live only), Cash and MTT side
              | by side; same-day sessions share one calendar tile with the day
              | total; MTT rows are blue. Unseen on a phone.
