@@ -16,11 +16,15 @@ import { textureLine } from '../lib/position.js'
 const title = 'mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-faint'
 const LABEL = { flop: 'Flop', turn: 'Turn', river: 'River' }
 
-/** @param {{p: object}} props  summary.play.postflop */
-export default function Postflop({ p }) {
-  const [game, setGame] = useState('tournament')
+/**
+ * @param {{p: object, game?: 'tournament' | 'cash'}} props  summary.play.postflop;
+ *   `game` fixes the game and hides the switch (the Online tab's halves).
+ */
+export default function Postflop({ p, game: fixed }) {
+  const [picked, setGame] = useState('tournament')
+  const game = fixed || picked
   const [open, setOpen] = useState(null)
-  const texture = textureLine(p.flop_texture?.[game])
+  const texture = textureLine(p?.flop_texture?.[game])
   if (!p || !p.streets) return null
   const streets = p.streets.filter((s) => p[s])
   return (
@@ -29,7 +33,7 @@ export default function Postflop({ p }) {
       <p className="mb-2 text-[11px] text-faint">
         The first bet on each street, by someone else: did you fold, call or raise right? Tap a street.
       </p>
-      <div className="mb-2">
+      <div className={fixed ? 'hidden' : 'mb-2'}>
         <Segmented
           size="sm"
           value={game}

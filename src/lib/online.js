@@ -185,3 +185,18 @@ export function outcomeLabel(t) {
 export function monthLabel(key) {
   return new Date(`${key}-15T12:00:00`).toLocaleDateString('en-CA', { month: 'short', year: 'numeric' })
 }
+
+/** One decimal with a real minus sign and a plus on gains: '+6.2', '−1.5', '—'. */
+export function signed(v) {
+  if (v === null || v === undefined) return '—'
+  return `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(Math.round(v * 10) / 10)}`
+}
+
+/** My game's stat rows: [key, label, hint], tournament and cash alike. */
+export const STAT_ROWS = [
+  ['vpip', 'VPIP', 'Hands played voluntarily'],
+  ['pfr', 'PFR', 'Hands raised before the flop'],
+  ['three_bet', '3-bet', 'Re-raise when facing a raise'],
+  ['wtsd', 'Went to showdown', 'Of flops played'],
+  ['wsd', 'Won at showdown', 'Of showdowns'],
+]
