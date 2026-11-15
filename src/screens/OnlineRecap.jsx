@@ -48,7 +48,11 @@ export default function Recap({ review, entry, onReplay }) {
   )
 }
 
-function GradeCard({ recap, entry, luck }) {
+/**
+ * The grade up top. `headline` replaces the tournament's finish and net (the
+ * cash session review passes its own); without it, `entry` supplies them.
+ */
+export function GradeCard({ recap, entry, luck, headline = null }) {
   const g = recap.grade
   const tone = gradeTone(g.grade)
   const luckL = luckLine(luck)
@@ -64,14 +68,16 @@ function GradeCard({ recap, entry, luck }) {
           {g.grade || '—'}
         </div>
         <div className="min-w-0">
-          <div className="text-lg font-semibold">
-            {outcomeLabel(entry)}
-            {entry.net !== null && !entry.maybe_running && (
-              <span className={`num ml-2 ${entry.net > 0 ? 'text-gain' : entry.net < 0 ? 'text-loss' : 'text-muted'}`}>
-                {formatSignedUSD(entry.net)}
-              </span>
-            )}
-          </div>
+          {headline || (
+            <div className="text-lg font-semibold">
+              {outcomeLabel(entry)}
+              {entry.net !== null && !entry.maybe_running && (
+                <span className={`num ml-2 ${entry.net > 0 ? 'text-gain' : entry.net < 0 ? 'text-loss' : 'text-muted'}`}>
+                  {formatSignedUSD(entry.net)}
+                </span>
+              )}
+            </div>
+          )}
           <div className="num text-xs text-muted">
             {g.accuracy === null ? 'No graded decisions' : `Accuracy ${g.accuracy}% · ${g.decisions} decision${g.decisions === 1 ? '' : 's'}`}
           </div>
@@ -102,7 +108,7 @@ function GradeCard({ recap, entry, luck }) {
   )
 }
 
-function WorkOn({ recap }) {
+export function WorkOn({ recap }) {
   const practise = usePractise()
   if (!recap.work_on.length && !recap.keep) return null
   const lessons = recap.work_on.map((w) => w.lesson)

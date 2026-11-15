@@ -156,7 +156,7 @@ function startLabel(start, dayDate) {
 }
 
 /** VPIP · PFR · 3-bet · bb/100 in one compact row. */
-function StatStrip({ stats }) {
+export function StatStrip({ stats }) {
   const items = [
     ['VPIP', stats.vpip === null ? '—' : `${stats.vpip}%`],
     ['PFR', stats.pfr === null ? '—' : `${stats.pfr}%`],
@@ -445,7 +445,7 @@ function RecapReview({ review, entry }) {
 }
 
 /** A folded section: a row to tap, its content below when open. */
-function Disclosure({ label, count, children }) {
+export function Disclosure({ label, count, children }) {
   const [open, setOpen] = useState(false)
   return (
     <div>
@@ -522,7 +522,7 @@ function FullReview({ review, entry }) {
  * the flop when nearly all-in (play.bb_defence / play.flop grades, per
  * tournament). Nothing when the file predates them or none happened.
  */
-function MoreGrades({ review }) {
+export function MoreGrades({ review }) {
   const bbs = review.bb_decisions || []
   // postflop_decisions (flop, turn, river) replaced the one-day flop_decisions.
   const post = review.postflop_decisions || review.flop_decisions || []
@@ -609,7 +609,7 @@ const TAG_STYLE = {
 }
 
 /** A key hand as a card. `onReplay`, when given, adds a Replay button (recap files). */
-function Hand({ h, onReplay = null }) {
+export function Hand({ h, onReplay = null }) {
   return (
     <div className="card p-3.5">
       <div className="flex items-start justify-between gap-3">

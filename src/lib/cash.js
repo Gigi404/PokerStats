@@ -41,6 +41,20 @@ export function cashMonth(cash) {
 }
 
 /**
+ * A session's running net (review.curve, dollars after each hand) as
+ * ProfitChart points in cents, the tooltip naming the hand by its number.
+ */
+export function handCurve(curve, date) {
+  let prev = 0
+  return (curve || []).map((total, i) => {
+    const cents = Math.round(total * 100)
+    const point = { session: { date, venue: `Hand ${i + 1}` }, result: cents - prev, total: cents }
+    prev = cents
+    return point
+  })
+}
+
+/**
  * ProfitChart points, oldest first, in cents: {session, result, total}.
  * `session` carries what the chart's tooltip reads (date, venue).
  */

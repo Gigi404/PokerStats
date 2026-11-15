@@ -9,6 +9,8 @@ import BBDefence from './OnlineBBDefence.jsx'
 import FlopHabits from './OnlineFlop.jsx'
 import Postflop from './OnlinePostflop.jsx'
 import RiverChoice from './OnlineRiverChoice.jsx'
+import CashReview from './OnlineCashReview.jsx'
+import { gradeTone } from '../lib/recap.js'
 import { Row, StatCell, Table, USD } from './Online.jsx'
 
 /*
@@ -23,11 +25,14 @@ import { Row, StatCell, Table, USD } from './Online.jsx'
 */
 
 const title = 'mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint'
+const GRADE_TEXT = { gain: 'text-gain', loss: 'text-loss', accent: 'text-accent', muted: 'text-muted' }
 
 /** @param {{data: object}} props  the decrypted online summary */
 export default function Cash({ data }) {
   const [view, setView] = useState('recent')
   const [open, setOpen] = useState(null)
+  // The session whose full review is open (a row of cash.sessions with `review`).
+  const [review, setReview] = useState(null)
   const sessions = data.cash.sessions
 
   return (
@@ -50,7 +55,7 @@ export default function Cash({ data }) {
       ) : !sessions ? (
         <div className="card p-5 text-sm text-muted">Cash sessions arrive with the next results PokerEdge sends.</div>
       ) : view === 'recent' ? (
-        <Recent cash={data.cash} onOpen={setOpen} />
+        <Recent cash={data.cash} onOpen={setOpen} onReview={setReview} />
       ) : view === 'sessions' ? (
         <SessionList sessions={sessions} onOpen={setOpen} />
       ) : view === 'stakes' ? (
@@ -60,19 +65,29 @@ export default function Cash({ data }) {
       )}
 
       {/* Portalled: <main> animates with a transform (see History in Online.jsx). */}
-      {open && createPortal(<SessionSheet s={open} onClose={() => setOpen(null)} />, document.body)}
+      {open &&
+        createPortal(
+          <SessionSheet
+            s={open}
+            onClose={() => setOpen(null)}
+            onReview={open.review ? () => { setReview(open); setOpen(null) } : null}
+          />,
+          document.body,
+        )}
+      {review && createPortal(<CashReview s={review} onClose={() => setReview(null)} />, document.body)}
     </>
   )
 }
 
 /** The last session up top, this month beside it, then the last few. */
-function Recent({ cash, onOpen }) {
+function Recent({ cash, onOpen, onReview }) {
   const last = cash.sessions[0]
   if (!last) return <div className="card p-5 text-sm text-muted">No cash sessions yet.</div>
   const month = cashMonth(cash)
   return (
     <>
-      <button type="button" onClick={() => onOpen(last)} className="card-hero block w-full p-5 text-left">
+      {/* The last session opens straight on its review when it has one. */}
+      <button type="button" onClick={() => (last.review ? onReview(last) : onOpen(last))} className="card-hero block w-full p-5 text-left">
         <div className="text-xs font-semibold uppercase tracking-[0.14em] text-accent/80">
           Last session · {formatDay(last.date)}
         </div>
@@ -139,7 +154,12 @@ function Rows({ sessions, onOpen }) {
               {s.start}–{s.end} · {s.hands} hands · {rateLabel(s)}
             </div>
           </div>
-          <USD value={s.net} className="text-sm font-semibold" />
+          <div className="shrink-0 text-right">
+            <USD value={s.net} className="text-sm font-semibold" />
+            {s.review?.recap.grade.grade && (
+              <div className={`num text-[11px] font-bold ${GRADE_TEXT[gradeTone(s.review.recap.grade.grade)]}`}>{s.review.recap.grade.grade}</div>
+            )}
+          </div>
         </button>
       ))}
     </div>
@@ -147,7 +167,7 @@ function Rows({ sessions, onOpen }) {
 }
 
 /** One session, as a bottom sheet. */
-function SessionSheet({ s, onClose }) {
+function SessionSheet({ s, onClose, onReview }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
@@ -196,6 +216,11 @@ function SessionSheet({ s, onClose }) {
         <p className="mt-4 text-xs text-faint">
           A session is every hand with no break over 30 minutes, all tables together.
         </p>
+        {onReview && (
+          <button type="button" onClick={onReview} className="btn-gold mt-4 w-full rounded-xl py-3 font-semibold">
+            Open full review
+          </button>
+        )}
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cashCurve, cashMonth, minutesLabel, rateLabel, stakesLabel } from './cash.js'
+import { cashCurve, cashMonth, handCurve, minutesLabel, rateLabel, stakesLabel } from './cash.js'
 import { onlyGame } from './riverChoice.js'
 
 describe('cash wording', () => {
@@ -34,6 +34,15 @@ describe('cash wording', () => {
     const pts = cashCurve(newestFirst)
     expect(pts.map((p) => p.total)).toEqual([409, 159])
     expect(pts[0].session.venue).toBe('Cash · $0.10/0.25')
+  })
+})
+
+describe('a session hand by hand', () => {
+  it('turns the running net into chart points', () => {
+    const pts = handCurve([0.5, -1.25, 2], '2026-11-14')
+    expect(pts.map((p) => [p.result, p.total])).toEqual([[50, 50], [-175, -125], [325, 200]])
+    expect(pts[2].session).toEqual({ date: '2026-11-14', venue: 'Hand 3' })
+    expect(handCurve(undefined)).toEqual([])
   })
 })
 
