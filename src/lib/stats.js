@@ -121,6 +121,29 @@ export function tournamentStats(sessions) {
 }
 
 /**
+ * The Sessions screen headline: one month, LIVE only, cash and MTT kept apart
+ * (owner, 2026-11-13). Online results have their own tab and all-time lives on
+ * the Stats screen, so neither belongs here.
+ *
+ * Only finished sessions count: one still at the table has no result yet.
+ * MTT hours are summed here because tournamentStats has no time figure (ROI,
+ * not $/hour, is what a tournament is judged by); a tournament with a missing
+ * start or end time adds 0 minutes rather than being dropped from the count.
+ *
+ * @param {object[]} sessions
+ * @param {string} monthKey 'YYYY-MM', e.g. todayKey().slice(0, 7)
+ * @returns {{cash: object, mtt: object, mttMinutes: number}}
+ */
+export function monthHeadline(sessions, monthKey) {
+  const month = finished(sessions).filter((s) => s.setting === 'live' && s.date.startsWith(monthKey))
+  return {
+    cash: cashStats(month),
+    mtt: tournamentStats(month),
+    mttMinutes: month.filter(isTournament).reduce((m, s) => m + (minutesPlayed(s) || 0), 0),
+  }
+}
+
+/**
  * Finished sessions grouped by calendar day, keeping the order they came in
  * (the Sessions list passes them newest first). Each day carries its net.
  *
