@@ -19,6 +19,15 @@ export const TAGS = [
 /** What to look for, screen by screen. Each item is a question to answer by looking. */
 export const CHECKLIST = [
   {
+    // Added 2026-11-15 for the Sessions screen rebuilt 2026-11-13 (live only).
+    screen: 'Sessions (live)',
+    items: [
+      ['sess-month', 'The month header (Live, Cash | MTT side by side, $/hour and $/session): what you want to see first?'],
+      ['sess-day', 'Same-day sessions under one date tile with the day’s total: easy to find a night?'],
+      ['sess-mtt', 'MTT rows in blue: do they stand apart from cash at a glance?'],
+    ],
+  },
+  {
     screen: 'Online → Recent (day cards)',
     items: [
       ['day-grade', 'The night’s grade and luck line under “Decisions”: clear at a glance?'],
@@ -68,6 +77,19 @@ export const CHECKLIST = [
       ['game-leaks', 'Your biggest leak and the ranked list: is the top one what you would work on?'],
       ['game-trends', 'Opening rates by month and tickets: still needed?'],
       ['game-order', 'If this page showed only three things, which three?'],
+      // Added 2026-11-15: the My game cards built after v0.21.0 (10-29 → 10-31),
+      // none of which had been looked at on a phone. Appended, never renamed:
+      // notes are stored by key, so an existing key must keep its exact name.
+      ['game-luck', 'How much is luck (ROI with and without your best, how fragile the balance is): understood? believed?'],
+      ['game-reality', 'Do the grades hold up (calling after the flop, big blind calls): convincing?'],
+      ['game-river', 'River choices: does it match how you remember playing the river?'],
+      ['game-payjumps', 'Pay jumps: useful near the money? clear?'],
+      ['game-position', 'Position after the flop: keep, move, remove?'],
+      ['game-videos', '“Work on: from the videos”: would you watch them? the right ones?'],
+      ['game-suits', 'Which tournaments suit you: does it match your gut? would it change what you register for?'],
+      ['game-tilt', 'Tilt check: fair? would you want to know this during a night?'],
+      ['game-theory', 'The theory notes under a leak or a “Work on”: do they explain the why?'],
+      ['game-practise', 'The “Practise these” buttons (recap, leaks): did you tap one? did the puzzles fit?'],
     ],
   },
   {
@@ -77,6 +99,14 @@ export const CHECKLIST = [
       ['other-history', 'History: still needed next to Recent?'],
       ['other-goal', 'Goal (bankroll ladder): right place?'],
       ['other-charts', 'Charts: used? would you rather reach them from a puzzle or a grade?'],
+    ],
+  },
+  {
+    // Added 2026-11-15 for "How sure are we" (under More since 2026-10-29).
+    screen: 'More',
+    items: [
+      ['more-trust', 'How sure are we: does it change how far you trust the grades?'],
+      ['more-theory', 'Theory covered / not covered yet: useful, or only for us?'],
     ],
   },
   {
