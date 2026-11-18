@@ -29,6 +29,9 @@ everything players bet there, not this hand, and never shows the numbers.
   backdoor_flush backdoor_straight`
 - `implied_bb` float|null, extra bb to win later when hitting for the call to
   break even against `his`
+- `blk` list|absent, blockers hero holds: `nut_flush`, `flush`, `straight`.
+  Draw kinds also include `one_card_nut_flush_draw`, `one_card_flush_draw`
+  (one hole card of a suit with three on board)
 
 ## What to build
 
@@ -53,6 +56,36 @@ parts, always in this order, exact numbers, **never the word "roughly"**:
    disagree:" so it's never left looking like a contradiction. When they agree,
    keep parts 1 and 2 short.
 
+## How it looks (owner: "make it nice in the app")
+
+A visual block, not a paragraph. Read `src/components/PokerTable.jsx` and the
+existing answer screen first and use the app's own colours, card rendering
+and type scale. No new dependency.
+
+- **His cards, face up**, rendered like the table's cards, with a result chip
+  beside them: won / lost / split, coloured with the app's existing
+  good/bad/neutral tokens.
+- **An equity bar**, the centrepiece: one horizontal 0-100% track with a marker
+  for **needed** (pot odds), a fill or marker for **vs his hand**, and one for
+  **vs the range**, each labelled with its number. You see at a glance which
+  side of "needed" each one falls. Readable at phone width, accessible
+  (labels, not colour alone).
+- **Draw row** (flop/turn): the draw named as a chip ("Nut flush draw",
+  "Gutshot" …), the outs as small cards, clean ones normal and dirty ones
+  greyed or struck with a one-word reason, and "rule of 4: 36% · exact 38%".
+- **Blockers** as a small chip ("You block the nut flush") when `blk` is set.
+- **His line** as street chips: Pre raise · Flop bet ⅓ · Turn check ·
+  River bet ¾.
+- **The verdict line** last, one sentence. When result and grade disagree, a
+  distinct callout at the top of the block: "This time the result and the
+  grade disagree".
+- Collapsed details are fine if the block gets tall, but the bar and the
+  result chip stay visible without a tap.
+
+Check it at 360 px wide and in both themes if the app has two. Take a
+screenshot of each fixture case if the night setup allows it and mention
+them in the morning note.
+
 Match the existing components and wording style (`grades.js`, `flopGrades.js`,
 `bbDefence.js`). Suits render as the app already renders cards.
 
@@ -62,6 +95,7 @@ Match the existing components and wording style (`grades.js`, `flopGrades.js`,
 - No new dependency. No change to Leitner/progress logic, no storage change.
 - Tests: unit tests for the wording function covering river fold beaten,
   river fold that would have won, split, flop draw with dirty outs,
+  one-card nut flush draw, nut-flush blocker on the river,
   `eq_range` null, no `sd` (block absent). `npm test && npm run build` pass.
 - Nothing pushed, nothing deployed (pushing `main` deploys Pages: owner only).
 - Docs: the project's session log / CLAUDE.md entry, short.
