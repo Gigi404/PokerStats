@@ -89,6 +89,42 @@ them in the morning note.
 Match the existing components and wording style (`grades.js`, `flopGrades.js`,
 `bbDefence.js`). Suits render as the app already renders cards.
 
+## Then, in this order, after the Showdown block works
+
+### A. Tournament stage on every tournament puzzle (`p.stg`)
+
+PokerEdge adds `p.stg` (keys may be absent; show only what is present, never
+fill a gap): `lvl`, `min`, `bb`, `avg`, `rank` + seat count, `field`, `paid`,
+`itm`, `phase` (early / middle / bubble / itm / final_table), `icm` (an
+estimate: label it so). Show it as one compact strip at the top of the puzzle,
+above the table: e.g. "Level 14 · 1h 52m · 18 bb (avg 31) · 6th of 8 ·
+Bubble". It is context for the decision, so it shows BEFORE answering. Build
+from fixtures; absent `stg` renders as before.
+
+### B. Rethink the Puzzles header (owner: "it doesn't fit properly and it's weird to navigate")
+
+Today, stacked: the ScoreBar (level ring, XP, sound/toggle buttons), a
+Tournament/Cash Segmented, then a horizontally scrolling row of spot chips.
+Goal: fits at 360 px with no sideways scroll for anything essential, one
+obvious way to change what you're drilling, and the puzzle itself higher on
+the screen. Direction (adjust if the code shows a better fit, and say why in
+the morning note): one compact top row (level + XP bar + today's score, with
+sound/settings behind one icon), and one "what am I drilling" control
+combining game and spot (e.g. a single button showing "Tournament · River"
+that opens a sheet with both choices). Keep every existing filter and the
+Practise focus links (`focus`, `focusGame`) working. Before/after screenshots
+in the morning note if possible. The owner reviews the look before merge.
+
+### C. Online tournaments played the same day in one section
+
+Like live sessions already are (`src/screens/Sessions.jsx`, `groupByDay` in
+`src/lib/stats.js`, the `DayGroup` calendar tile): wherever the Online tab
+lists tournaments one by one (find every such list: `Online.jsx`,
+`OnlineReview.jsx`, `OnlineRecap.jsx`, …), group the ones played the same
+calendar day under one day header with the day's total. Reuse `groupByDay`
+/ `DayGroup` rather than a second implementation. Don't change what a single
+tournament row shows or where it opens.
+
 ## Rules
 
 - Read `CLAUDE.md` and `NEXT_SESSION_PLAN.md` first.
